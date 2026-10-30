@@ -5,15 +5,16 @@ import {
   Search,
   Trash2,
   Lock,
+  Unlock,
   Copy,
   Check,
   ExternalLink,
   MessageSquare,
   Clock,
   Calendar,
-  AlertCircle,
   RefreshCw,
   Share2,
+  ShieldAlert,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { echoService } from '@/api/echoService';
@@ -24,6 +25,7 @@ import { Avatar } from '@/components/common/Avatar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FeedbackCardSkeleton } from '@/components/common/Skeleton';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { useCountdown } from '@/hooks/useCountdown';
 import { formatRelativeTime, formatFullDate } from '@/utils/date';
 import { getMessageIdentity } from '@/utils/avatar';
 
@@ -47,9 +49,13 @@ export const RoomFeedbackPage: React.FC = () => {
   // Close Room Modal State
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isClosingRoom, setIsClosingRoom] = useState(false);
+  const [isReopeningRoom, setIsReopeningRoom] = useState(false);
 
   const { copy, isCopied } = useCopyToClipboard();
   const publicUrl = roomId ? `${window.location.origin}/room/${roomId}` : '';
+
+  const countdown = useCountdown(room?.expires_at);
+  const isRoomExpired = Boolean(room?.is_expired || countdown.isExpired);
 
   const loadData = async (isManualRefresh = false) => {
     if (!roomId) return;
@@ -113,6 +119,23 @@ export const RoomFeedbackPage: React.FC = () => {
     }
   };
 
+  const handleReopenRoom = async () => {
+    if (!roomId) return;
+
+    try {
+      setIsReopeningRoom(true);
+      await echoService.reopenRoom(roomId);
+      if (room) {
+        setRoom({ ...room, status: 'active' });
+      }
+      toast.success('Room reopened! New submissions are now enabled.');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reopen room.');
+    } finally {
+      setIsReopeningRoom(false);
+    }
+  };
+
   const filteredAndSortedFeedback = useMemo(() => {
     let list = [...feedbackList];
 
@@ -135,6 +158,35 @@ export const RoomFeedbackPage: React.FC = () => {
 
     return list;
   }, [feedbackList, searchQuery, sortOrder]);
+
+  if (error && !isLoading) {
+    return (
+      <div className="min-h-[75dvh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full p-8 rounded-2xl border border-rose-500/20 bg-white/90 dark:bg-[#121212]/90 backdrop-blur-md text-center space-y-4 shadow-card-light dark:shadow-card-dark">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center mx-auto">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-white font-display">
+              {error.includes('Forbidden') ? 'Access Forbidden' : 'Room Unavailable'}
+            </h2>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              {error.includes('Forbidden')
+                ? 'You do not have permission to inspect this room. Each owner workspace is strictly isolated in DynamoDB.'
+                : error}
+            </p>
+          </div>
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <Link to="/dashboard">
+              <Button variant="primary" size="sm">
+                Back to Your Workspace
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 min-h-[85dvh]">
@@ -185,11 +237,25 @@ export const RoomFeedbackPage: React.FC = () => {
                 {room ? room.room_name : 'Loading Room...'}
               </h1>
               {room && (
-                <Badge variant={room.status === 'active' ? 'active' : 'closed'} dot size="sm">
-                  {room.status === 'active' ? 'Active' : 'Closed'}
-                </Badge>
+                <>
+                  <Badge
+                    variant={isRoomExpired ? 'expired' : room.status === 'active' ? 'active' : 'closed'}
+                    dot
+                    size="sm"
+                  >
+                    {isRoomExpired ? 'Expired' : room.status === 'active' ? 'Active' : 'Closed'}
+                  </Badge>
+                  <Badge variant="neutral" size="sm" className="capitalize">
+                    {room.visibility || 'public'}
+                  </Badge>
+                </>
               )}
             </div>
+            {room?.room_description && (
+              <p className="text-sm text-neutral-600 dark:text-neutral-300 italic pt-1">
+                "{room.room_description}"
+              </p>
+            )}
             <div className="flex items-center gap-3 text-xs text-neutral-400 dark:text-neutral-500 flex-wrap">
               <span className="font-mono bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded">
                 Room ID: {roomId}
@@ -207,7 +273,7 @@ export const RoomFeedbackPage: React.FC = () => {
             </div>
           </div>
 
-          {room && room.status === 'active' && (
+          {room && room.status === 'active' && !isRoomExpired && (
             <Button
               variant="outline"
               size="sm"
@@ -218,6 +284,35 @@ export const RoomFeedbackPage: React.FC = () => {
               Close Submissions
             </Button>
           )}
+
+          {room && room.status === 'closed' && !isRoomExpired && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReopenRoom}
+              isLoading={isReopeningRoom}
+              leftIcon={<Unlock className="w-3.5 h-3.5 text-emerald-500" />}
+              className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 flex-shrink-0"
+            >
+              Reopen Submissions
+            </Button>
+          )}
+        </div>
+
+        {/* 24-Hour Expiry Bar */}
+        <div className="p-3 rounded-xl bg-neutral-100/70 dark:bg-white/5 border border-neutral-200/60 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
+            <Clock className="w-4 h-4 text-brand-500 flex-shrink-0" />
+            <span>24-Hour Room Lifespan:</span>
+            <span className="font-mono font-bold text-neutral-900 dark:text-white">
+              {isRoomExpired ? 'Expired' : countdown.formatted}
+            </span>
+          </div>
+          <span className="text-[11px] text-neutral-400">
+            {isRoomExpired
+              ? 'Automatic 24-hour limit reached. DynamoDB TTL physically cleans up records asynchronously.'
+              : 'Submissions close automatically 24h from room creation.'}
+          </span>
         </div>
 
         {/* Public Link Reminder */}
@@ -260,121 +355,100 @@ export const RoomFeedbackPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Conversation History Stream */}
-      <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/70 dark:bg-[#101010]/80 backdrop-blur-sm p-4 sm:p-6 min-h-[300px]">
-        {isLoading ? (
-          <div className="space-y-4">
-            <FeedbackCardSkeleton />
-            <FeedbackCardSkeleton />
-          </div>
-        ) : error ? (
-          <div className="p-8 rounded-2xl border border-rose-500/20 bg-rose-500/10 text-center space-y-3">
-            <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
-            <h3 className="text-base font-bold text-rose-600 dark:text-rose-400">
-              Unable to Load Room
-            </h3>
-            <p className="text-xs text-rose-500/90 max-w-md mx-auto">{error}</p>
-            <Button variant="secondary" size="sm" onClick={() => loadData()}>
-              Retry
+      {/* Feedback Messages List */}
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <FeedbackCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredAndSortedFeedback.length > 0 ? (
+        <div className="space-y-4">
+          {filteredAndSortedFeedback.map((item) => {
+            const identity = getMessageIdentity(item.feedback_id, item.display_name);
+
+            return (
+              <div
+                key={item.feedback_id}
+                className="group relative rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white dark:bg-[#121212] p-5 sm:p-6 shadow-sm hover:shadow-card-light dark:hover:shadow-card-dark transition-all space-y-3"
+              >
+                {/* Message Header */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={identity.name}
+                      gradient={identity.gradient}
+                      size="sm"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-neutral-900 dark:text-white font-display">
+                          {identity.name}
+                        </span>
+                        <span className="text-[11px] font-mono text-neutral-400 dark:text-neutral-500">
+                          #{item.feedback_id.slice(0, 6)}
+                        </span>
+                      </div>
+                      <span
+                        className="text-[11px] text-neutral-400 dark:text-neutral-500 block"
+                        title={formatFullDate(item.created_at)}
+                      >
+                        {formatRelativeTime(item.created_at)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setItemToDelete(item)}
+                    className="opacity-0 group-hover:opacity-100 p-2 rounded-lg text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 transition-all focus:opacity-100"
+                    title="Delete this message"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Message Content */}
+                <p className="text-sm sm:text-base text-neutral-800 dark:text-neutral-200 leading-relaxed break-words whitespace-pre-wrap pl-11">
+                  {item.message}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      ) : feedbackList.length === 0 ? (
+        <div className="p-12 text-center rounded-2xl border border-dashed border-neutral-300 dark:border-white/10 bg-white/40 dark:bg-white/5 space-y-3">
+          <MessageSquare className="w-8 h-8 text-neutral-400 mx-auto" />
+          <h3 className="text-base font-bold text-neutral-900 dark:text-white">
+            No Messages Received Yet
+          </h3>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
+            Share the public room link with your audience or colleagues to begin receiving honest anonymous thoughts.
+          </p>
+          <div className="pt-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => copy(publicUrl, 'Public link copied!')}
+              leftIcon={<Copy className="w-3.5 h-3.5" />}
+            >
+              Copy Shareable Link
             </Button>
           </div>
-        ) : filteredAndSortedFeedback.length > 0 ? (
-          <div className="space-y-4">
-            {filteredAndSortedFeedback.map((item) => {
-              const identity = getMessageIdentity(item.feedback_id, item.display_name);
-              return (
-                <div
-                  key={item.feedback_id}
-                  className="group relative rounded-xl border border-neutral-200/70 dark:border-white/5 bg-white dark:bg-[#151515] p-4 sm:p-5 shadow-xs hover:border-neutral-300 dark:hover:border-white/15 transition-all space-y-3"
-                >
-                  {/* Message Header */}
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        name={identity.name}
-                        gradient={identity.gradient}
-                        size="md"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-semibold text-neutral-900 dark:text-white font-display">
-                            {identity.name}
-                          </h4>
-                          <span className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
-                            #{item.feedback_id.slice(-6)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-neutral-400 dark:text-neutral-500">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {formatRelativeTime(item.created_at)}
-                          </span>
-                          <span>•</span>
-                          <span>{formatFullDate(item.created_at)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Delete Message Button */}
-                    <button
-                      type="button"
-                      onClick={() => setItemToDelete(item)}
-                      className="p-2 rounded-lg text-neutral-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                      title="Delete this message"
-                      aria-label="Delete message"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Message Body */}
-                  <div className="pl-1 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed font-normal whitespace-pre-wrap break-words">
-                    {item.message}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : feedbackList.length === 0 ? (
-          /* Empty State */
-          <div className="p-12 text-center space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-500 flex items-center justify-center mx-auto">
-              <MessageSquare className="w-6 h-6" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-neutral-900 dark:text-white font-display">
-                No Messages Yet
-              </h3>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
-                Share the public link with participants to begin the anonymous group conversation.
-              </p>
-            </div>
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => copy(publicUrl, 'Public link copied!')}
-                leftIcon={<Copy className="w-3.5 h-3.5" />}
-              >
-                Copy Room Link
-              </Button>
-            </div>
-          </div>
-        ) : (
-          /* Search Empty State */
-          <div className="p-8 text-center text-xs text-neutral-500 dark:text-neutral-400">
-            No messages matching "{searchQuery}".
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="p-8 text-center text-sm text-neutral-500">
+          No messages match "{searchQuery}".
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={!!itemToDelete}
         onClose={() => setItemToDelete(null)}
         onConfirm={handleDeleteFeedback}
-        title="Delete Message?"
-        message="This will permanently remove this anonymous message from the AWS database. This action cannot be reversed."
+        title="Delete Feedback Message?"
+        message="Are you sure you want to delete this message? This action is permanent and cannot be undone."
         confirmLabel="Delete Message"
         variant="danger"
         isLoading={isDeleting}
@@ -385,8 +459,8 @@ export const RoomFeedbackPage: React.FC = () => {
         isOpen={isCloseModalOpen}
         onClose={() => setIsCloseModalOpen(false)}
         onConfirm={handleCloseRoom}
-        title="Close Room Submissions?"
-        message="Closing this room will disable public messages immediately. Existing message history will remain readable."
+        title="Close Room to New Submissions?"
+        message="Are you sure you want to close this room? Visitors will no longer be able to post messages."
         confirmLabel="Close Room"
         variant="warning"
         isLoading={isClosingRoom}

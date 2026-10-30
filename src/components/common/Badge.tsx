@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/utils/cn';
 
 interface BadgeProps {
-  variant?: 'active' | 'closed' | 'neutral' | 'brand';
+  variant?: 'active' | 'closed' | 'expired' | 'neutral' | 'brand';
   size?: 'sm' | 'md';
   children: React.ReactNode;
   className?: string;
@@ -21,6 +21,8 @@ export const Badge: React.FC<BadgeProps> = ({
       'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
     closed:
       'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
+    expired:
+      'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
     neutral:
       'bg-neutral-100 text-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-400 border border-neutral-200 dark:border-white/10',
     brand:
@@ -30,6 +32,7 @@ export const Badge: React.FC<BadgeProps> = ({
   const dotColors = {
     active: 'bg-emerald-500 animate-pulse',
     closed: 'bg-amber-500',
+    expired: 'bg-rose-500',
     neutral: 'bg-neutral-400',
     brand: 'bg-brand-500',
   };

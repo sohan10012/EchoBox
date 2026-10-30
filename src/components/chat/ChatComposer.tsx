@@ -9,6 +9,7 @@ interface ChatComposerProps {
   onSendMessage: (text: string) => Promise<boolean>;
   onOpenChangeIdentity: () => void;
   isClosed?: boolean;
+  isExpired?: boolean;
 }
 
 const MAX_CHAR_LIMIT = 2000;
@@ -18,11 +19,20 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   onSendMessage,
   onOpenChangeIdentity,
   isClosed = false,
+  isExpired = false,
 }) => {
   const [text, setText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   // Auto-resize textarea to fit text (up to max height)
   useEffect(() => {
@@ -58,6 +68,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       const success = await onSendMessage(trimmed);
       if (success) {
         setText('');
+        setCooldown(2);
         if (textareaRef.current) {
           textareaRef.current.style.height = 'auto';
         }
@@ -71,6 +82,20 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
 
   const charCount = text.length;
   const isOverLimit = charCount > MAX_CHAR_LIMIT;
+
+  if (isExpired) {
+    return (
+      <div className="p-4 sm:p-5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
+          <Lock className="w-4 h-4" />
+          <span>Room Has Expired (24-Hour Limit)</span>
+        </div>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
+          This room has reached its 24-hour lifetime. You can view previous conversation messages, but no new anonymous submissions are permitted.
+        </p>
+      </div>
+    );
+  }
 
   if (isClosed) {
     return (
@@ -164,11 +189,11 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             size="sm"
             onClick={handleSubmit}
             isLoading={isSubmitting}
-            disabled={!text.trim() || isOverLimit || isSubmitting}
+            disabled={!text.trim() || isOverLimit || isSubmitting || cooldown > 0}
             className="shadow-glow-sm h-8 px-4"
-            rightIcon={<Send className="w-3.5 h-3.5 ml-1" />}
+            rightIcon={cooldown === 0 ? <Send className="w-3.5 h-3.5 ml-1" /> : undefined}
           >
-            Send
+            {cooldown > 0 ? `Wait ${cooldown}s` : 'Send'}
           </Button>
         </div>
       </div>

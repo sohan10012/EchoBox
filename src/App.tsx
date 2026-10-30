@@ -4,7 +4,9 @@ import { Toaster } from 'sonner';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { Navbar } from '@/components/common/Navbar';
+import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { LandingPage } from '@/pages/LandingPage';
+import { ManagePostsPage } from '@/pages/ManagePostsPage';
 import { AuthPage } from '@/pages/AuthPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { RoomFeedbackPage } from '@/pages/RoomFeedbackPage';
@@ -20,11 +22,33 @@ const AppContent: React.FC = () => {
       <main className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/my-posts" element={<ManagePostsPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/dashboard/room/:roomId" element={<RoomFeedbackPage />} />
-          <Route path="/room/:roomId/feedback" element={<RoomFeedbackPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/room/:roomId"
+            element={
+              <ProtectedRoute>
+                <RoomFeedbackPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/room/:roomId/feedback"
+            element={
+              <ProtectedRoute>
+                <RoomFeedbackPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/room/:roomId" element={<PublicFeedbackPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />

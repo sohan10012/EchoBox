@@ -4,34 +4,50 @@ import {
   Check,
   RefreshCw,
   AlertCircle,
-  Share2,
   ArrowDown,
+  Clock,
+  ShieldCheck,
+  Copy,
+  Info,
+  MessageSquare,
+  KeyRound,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { echoService } from '@/api/echoService';
 import { FeedbackItem, RoomMetadata } from '@/api/types';
 import { useAnonymousIdentity } from '@/hooks/useAnonymousIdentity';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { useCountdown } from '@/hooks/useCountdown';
+import { useAuth } from '@/context/AuthContext';
+import { formatRelativeTime, formatFullDate } from '@/utils/date';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { Avatar } from '@/components/common/Avatar';
+import { Modal } from '@/components/common/Modal';
 import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
 import { ChatComposer } from '@/components/chat/ChatComposer';
 import { ChatSkeleton } from '@/components/chat/ChatSkeleton';
 import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
 import { ChangeIdentityModal } from '@/components/chat/ChangeIdentityModal';
+import { ManagePostsModal } from '@/components/identity/ManagePostsModal';
 
-const POLLING_INTERVAL_MS = 5000;
+const POLLING_INTERVAL_MS = 4500;
 
 export const PublicFeedbackPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { identity, changeIdentity } = useAnonymousIdentity();
+  const { echoIdentity, isEchoIdentityAuthenticated } = useAuth();
 
   const [room, setRoom] = useState<RoomMetadata | null>(null);
   const [messages, setMessages] = useState<FeedbackItem[]>([]);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Mobile Drawers & Modals
+  const [isMobileInfoOpen, setIsMobileInfoOpen] = useState(false);
+  const [isMobileIdentityOpen, setIsMobileIdentityOpen] = useState(false);
+  const [isManagePostsModalOpen, setIsManagePostsModalOpen] = useState(false);
 
   // Set of feedback IDs sent by this browser in the current session
   const [mySentIds, setMySentIds] = useState<Set<string>>(() => {
@@ -58,6 +74,10 @@ export const PublicFeedbackPage: React.FC = () => {
 
   const { copy, isCopied } = useCopyToClipboard();
   const publicUrl = window.location.href;
+
+  // Countdown timer based on room.expires_at
+  const countdown = useCountdown(room?.expires_at);
+  const isRoomExpired = Boolean(room?.is_expired || countdown.isExpired);
 
   // Persist sent message IDs to session storage
   const recordSentMessage = useCallback((feedbackId: string) => {
@@ -115,7 +135,7 @@ export const PublicFeedbackPage: React.FC = () => {
     fetchRoomAndInitialMessages();
   }, [fetchRoomAndInitialMessages]);
 
-  // Modest background polling (every 4-6s)
+  // Background polling (every 4.5s) with tab visibility pausing
   useEffect(() => {
     if (!roomId || isLoadingRoom || !!error) return;
 
@@ -200,6 +220,10 @@ export const PublicFeedbackPage: React.FC = () => {
   // Send message action
   const handleSendMessage = async (text: string): Promise<boolean> => {
     if (!roomId) return false;
+    if (isRoomExpired) {
+      toast.error('This room has expired and can no longer accept submissions.');
+      return false;
+    }
 
     try {
       const response = await echoService.submitFeedback(roomId, text, {
@@ -237,6 +261,7 @@ export const PublicFeedbackPage: React.FC = () => {
   const handleConfirmIdentityChange = () => {
     const newIdentity = changeIdentity();
     toast.success(`Identity changed to ${newIdentity.displayName}`);
+    setIsMobileIdentityOpen(false);
   };
 
   // Error State
@@ -271,115 +296,376 @@ export const PublicFeedbackPage: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 h-[calc(100dvh-4rem)] overflow-hidden">
-      {/* Chat Room Header */}
-      <div className="flex-shrink-0 rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/85 dark:bg-[#121212]/90 backdrop-blur-md p-3 sm:p-4 mb-3 shadow-sm flex items-center justify-between gap-3">
-        {/* Left: Room Title, Status, and ID */}
-        <div className="min-w-0 space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white font-display truncate">
-              {room ? room.room_name : 'Loading Room...'}
-            </h1>
-            {room && (
-              <Badge variant={room.status === 'active' ? 'active' : 'closed'} dot size="sm">
-                {room.status === 'active' ? 'Active Space' : 'Closed'}
-              </Badge>
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 h-[calc(100dvh-4rem)] flex flex-col min-h-0 overflow-hidden">
+      {/* 3-Column Grid for Laptop/Desktop; Single Column for Mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-full min-h-0">
+        {/* ========================================================= */}
+        {/* LEFT COLUMN: Room Info & 24h Expiry Countdown (Desktop)  */}
+        {/* ========================================================= */}
+        <aside className="hidden lg:flex lg:col-span-3 flex-col gap-4 overflow-y-auto pr-1">
+          {/* Room Details Card */}
+          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-4 shadow-sm">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-mono text-brand-500 uppercase tracking-wider font-semibold">
+                  {room?.visibility === 'public' ? 'Public Room' : 'Private Space'}
+                </span>
+                <Badge
+                  variant={isRoomExpired ? 'expired' : room?.status === 'active' ? 'active' : 'closed'}
+                  dot
+                  size="sm"
+                >
+                  {isRoomExpired ? 'Expired' : room?.status === 'active' ? 'Active' : 'Closed'}
+                </Badge>
+              </div>
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-white font-display tracking-tight leading-snug">
+                {room ? room.room_name : 'Loading Space...'}
+              </h2>
+            </div>
+
+            {/* Discussion Prompt */}
+            {room?.room_description && (
+              <div className="p-3 rounded-xl bg-neutral-100/80 dark:bg-white/[0.04] border border-neutral-200/60 dark:border-white/5 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-brand-600 dark:text-brand-400">
+                  <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider font-semibold">
+                    Discussion Prompt
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed italic">
+                  "{room.room_description}"
+                </p>
+              </div>
             )}
+
+            <div className="pt-2 border-t border-neutral-100 dark:border-white/5 space-y-2.5 text-xs">
+              <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
+                <span>Room Identifier</span>
+                <span className="font-mono bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded text-neutral-800 dark:text-neutral-200">
+                  {roomId}
+                </span>
+              </div>
+              {room?.created_at && (
+                <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
+                  <span>Created</span>
+                  <span title={formatFullDate(room.created_at)}>
+                    {formatRelativeTime(room.created_at)}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
+                <span>Messages</span>
+                <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                  {messages.length} submissions
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-neutral-400 dark:text-neutral-500">
-            <span className="font-mono bg-neutral-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
-              #{roomId}
-            </span>
-            <span>•</span>
-            <span>{messages.length} {messages.length === 1 ? 'message' : 'messages'}</span>
+
+          {/* 24-Hour Expiry Card */}
+          <div
+            className={`rounded-2xl border p-5 space-y-3 shadow-sm ${
+              isRoomExpired
+                ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300'
+                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 flex-shrink-0" />
+                <span className="text-xs font-semibold uppercase tracking-wider">
+                  24-Hour Lifespan
+                </span>
+              </div>
+              <span className="font-mono text-sm font-bold">
+                {isRoomExpired ? 'Expired' : countdown.formatted}
+              </span>
+            </div>
+
+            <p className="text-[11px] leading-relaxed opacity-90">
+              {isRoomExpired
+                ? 'This space has exceeded its 24-hour lifetime. No further anonymous submissions can be sent.'
+                : 'EchoBox enforces a strict 24-hour conversation lifecycle. When the timer hits zero, submissions close automatically.'}
+            </p>
           </div>
-        </div>
 
-        {/* Right: Visitor Persona Pill & Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Identity Pill */}
-          <button
-            type="button"
-            onClick={() => setIsChangeIdentityModalOpen(true)}
-            title="Click to change your anonymous identity"
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-neutral-200/80 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors text-xs"
-          >
-            <Avatar
-              name={identity.displayName}
-              gradient={identity.gradient}
-              size="xs"
-            />
-            <span className="font-semibold text-neutral-800 dark:text-neutral-200 hidden md:inline font-display">
-              {identity.displayName}
+          {/* Invite & Share Card */}
+          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-4 space-y-3 shadow-sm">
+            <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 block">
+              Invite Participants
             </span>
-            <RefreshCw className="w-3 h-3 text-neutral-400 hover:text-brand-500" />
-          </button>
-
-          {/* Share Link Button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => copy(publicUrl, 'Room invite link copied!')}
-            className="hidden sm:inline-flex h-8 px-2.5"
-            title="Share this room link"
-          >
-            {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
-          </Button>
-        </div>
-      </div>
-
-      {/* Conversation Scrollable Region */}
-      <div className="relative flex-1 rounded-2xl border border-neutral-200/80 dark:border-white/10 bg-white/50 dark:bg-[#0c0c0c]/60 backdrop-blur-sm overflow-hidden flex flex-col mb-3">
-        <div
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5"
-        >
-          {isLoadingMessages ? (
-            <ChatSkeleton />
-          ) : messages.length === 0 ? (
-            <ChatEmptyState
-              roomName={room?.room_name || 'this space'}
-              identity={identity}
-            />
-          ) : (
-            messages.map((msg) => (
-              <ChatMessageBubble
-                key={msg.feedback_id}
-                message={msg}
-                isCurrentUser={mySentIds.has(msg.feedback_id)}
-                currentUserDisplayName={identity.displayName}
-                currentUserGradient={identity.gradient}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={publicUrl}
+                className="w-full text-[11px] font-mono text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/10 px-2.5 py-1.5 rounded-lg select-all"
               />
-            ))
+              <Button
+                type="button"
+                variant={isCopied ? 'secondary' : 'primary'}
+                size="sm"
+                className="h-8 px-2.5 flex-shrink-0"
+                onClick={() => copy(publicUrl, 'Invite link copied!')}
+              >
+                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              </Button>
+            </div>
+            <p className="text-[10px] text-neutral-400 leading-tight">
+              Anyone with this URL can post anonymously without signing in.
+            </p>
+          </div>
+        </aside>
+
+        {/* ========================================================= */}
+        {/* CENTER COLUMN: Main Chat Conversation & Composer         */}
+        {/* ========================================================= */}
+        <main className="col-span-1 lg:col-span-6 flex flex-col h-full min-h-0 relative">
+          {/* Mobile Top Bar (Visible < lg) */}
+          <div className="lg:hidden flex-shrink-0 rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/85 dark:bg-[#121212]/90 backdrop-blur-md p-3 mb-2 shadow-sm flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h1 className="text-sm font-bold text-neutral-900 dark:text-white font-display truncate">
+                {room ? room.room_name : 'Loading Room...'}
+              </h1>
+              <div className="flex items-center gap-1.5 text-[10px] text-neutral-400">
+                <span className="font-mono">#{roomId}</span>
+                <span>•</span>
+                <span className="font-mono text-emerald-500 font-semibold">
+                  {isRoomExpired ? 'Expired' : countdown.formatted}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsMobileInfoOpen(true)}
+                className="p-1.5 rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
+                title="Room details"
+              >
+                <Info className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsMobileIdentityOpen(true)}
+                className="flex items-center gap-1.5 p-1 px-2 rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 text-xs"
+                title="My Identity"
+              >
+                <Avatar name={identity.displayName} gradient={identity.gradient} size="xs" />
+                <span className="font-semibold text-[11px] max-w-[80px] truncate">
+                  {identity.displayName.split(' ')[0]}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Pinned Discussion Prompt Banner (Desktop & Mobile) */}
+          {room?.room_description && (
+            <div className="flex-shrink-0 mb-2 rounded-xl border border-brand-500/25 bg-gradient-to-r from-brand-500/[0.08] via-brand-500/[0.03] to-transparent p-2.5 sm:px-3.5 sm:py-2.5 backdrop-blur-md shadow-xs">
+              <div className="flex items-start gap-2.5">
+                <div className="w-6 h-6 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-brand-500">
+                  <MessageSquare className="w-3.5 h-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                      Discussion Topic
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      {room.visibility === 'public' ? 'Public Room' : 'Private Space'}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-neutral-800 dark:text-neutral-200 leading-snug line-clamp-2">
+                    {room.room_description}
+                  </p>
+                </div>
+              </div>
+            </div>
           )}
 
-          {/* Anchor to scroll to bottom */}
-          <div ref={messagesEndRef} />
-        </div>
+          {/* Conversation Region */}
+          <div className="relative flex-1 rounded-2xl border border-neutral-200/80 dark:border-white/10 bg-white/50 dark:bg-[#0c0c0c]/60 backdrop-blur-sm overflow-hidden flex flex-col mb-3">
+            <div
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4"
+            >
+              {isLoadingMessages ? (
+                <ChatSkeleton />
+              ) : messages.length === 0 ? (
+                <ChatEmptyState
+                  roomName={room?.room_name || 'this space'}
+                  identity={identity}
+                />
+              ) : (
+                messages.map((msg) => (
+                  <ChatMessageBubble
+                    key={msg.feedback_id}
+                    message={msg}
+                    isCurrentUser={
+                      mySentIds.has(msg.feedback_id) ||
+                      (!!msg.anonymous_session_id && msg.anonymous_session_id === identity.sessionId)
+                    }
+                    currentUserDisplayName={identity.displayName}
+                    currentUserGradient={identity.gradient}
+                  />
+                ))
+              )}
 
-        {/* Floating Scroll-to-Bottom Button */}
-        {showScrollBottom && (
-          <button
-            type="button"
-            onClick={scrollToBottom}
-            className="absolute bottom-4 right-4 z-10 w-9 h-9 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
-            aria-label="Scroll to newest messages"
-          >
-            <ArrowDown className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+              {/* Anchor to scroll to bottom */}
+              <div ref={messagesEndRef} />
+            </div>
 
-      {/* Chat Composer Section */}
-      <div className="flex-shrink-0">
-        <ChatComposer
-          identity={identity}
-          onSendMessage={handleSendMessage}
-          onOpenChangeIdentity={() => setIsChangeIdentityModalOpen(true)}
-          isClosed={room?.status === 'closed'}
-        />
+            {/* Floating Scroll-to-Bottom Button */}
+            {showScrollBottom && (
+              <button
+                type="button"
+                onClick={scrollToBottom}
+                className="absolute bottom-4 right-4 z-10 w-9 h-9 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+                aria-label="Scroll to newest messages"
+              >
+                <ArrowDown className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Chat Composer Section */}
+          <div className="flex-shrink-0">
+            <ChatComposer
+              identity={identity}
+              onSendMessage={handleSendMessage}
+              onOpenChangeIdentity={() => setIsChangeIdentityModalOpen(true)}
+              isClosed={room?.status === 'closed'}
+              isExpired={isRoomExpired}
+            />
+          </div>
+        </main>
+
+        {/* ========================================================= */}
+        {/* RIGHT COLUMN: Anonymous Identity & Privacy Guidelines    */}
+        {/* ========================================================= */}
+        <aside className="hidden lg:flex lg:col-span-3 flex-col gap-4 overflow-y-auto pl-1">
+          {/* Persona Card */}
+          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                Your Persona
+              </span>
+              <span className="text-[10px] font-mono text-neutral-500 bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded">
+                Tab Persistent
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Avatar
+                name={identity.displayName}
+                gradient={identity.gradient}
+                size="lg"
+                className="ring-2 ring-brand-500/20"
+              />
+              <div className="min-w-0">
+                <p className="font-bold text-neutral-900 dark:text-white font-display text-base truncate">
+                  {identity.displayName}
+                </p>
+                <p className="text-[11px] text-neutral-400 truncate">
+                  Session: {identity.sessionId.slice(0, 10)}...
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              All messages you post in this room will appear under this pseudonym. No personal data, email, or credentials are required.
+            </p>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full text-xs"
+              onClick={() => setIsChangeIdentityModalOpen(true)}
+              leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+            >
+              Change Identity
+            </Button>
+          </div>
+
+          {/* Manage My Posts Connection Card */}
+          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-3 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 font-semibold text-xs">
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Manage My Posts</span>
+              </div>
+              {isEchoIdentityAuthenticated && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Connected" />
+              )}
+            </div>
+
+            {isEchoIdentityAuthenticated ? (
+              <div className="space-y-2.5">
+                <div className="p-2.5 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-between">
+                  <span className="text-[11px] text-neutral-400 font-mono">ID:</span>
+                  <span className="font-mono text-xs font-bold text-brand-600 dark:text-brand-400">
+                    {echoIdentity?.echoboxId}
+                  </span>
+                </div>
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                  Submissions sent from this browser are linked to your EchoBox ID. You can manage or delete them anytime.
+                </p>
+                <Link to="/my-posts">
+                  <Button variant="secondary" size="sm" className="w-full text-xs">
+                    Open My Posts Dashboard
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                  Participating is completely anonymous. Optionally connect an EchoBox ID if you want to manage or delete your messages later. No email needed.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => setIsManagePostsModalOpen(true)}
+                  leftIcon={<KeyRound className="w-3.5 h-3.5" />}
+                >
+                  Connect EchoBox ID
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Anonymity Architecture Card */}
+          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-3.5 shadow-sm">
+            <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400 font-semibold text-xs">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Anonymity Architecture</span>
+            </div>
+
+            <ul className="space-y-2.5 text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0 mt-1.5" />
+                <span>
+                  <strong>Zero Tracking:</strong> EchoBox does not log IP addresses, fingerprint devices, or persist user-identifying cookies.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0 mt-1.5" />
+                <span>
+                  <strong>24h Purge:</strong> Native DynamoDB TTL deletes conversation records after exactly 24 hours.
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 flex-shrink-0 mt-1.5" />
+                <span>
+                  <strong>Stable Pseudonyms:</strong> Your avatar and pseudonym remain consistent throughout this session until explicitly changed.
+                </span>
+              </li>
+            </ul>
+          </div>
+        </aside>
       </div>
 
       {/* Change Identity Confirmation Dialog */}
@@ -388,6 +674,134 @@ export const PublicFeedbackPage: React.FC = () => {
         onClose={() => setIsChangeIdentityModalOpen(false)}
         currentIdentity={identity}
         onConfirmChange={handleConfirmIdentityChange}
+      />
+
+      {/* Mobile Info Sheet/Modal */}
+      <Modal
+        isOpen={isMobileInfoOpen}
+        onClose={() => setIsMobileInfoOpen(false)}
+        title={room ? room.room_name : 'Room Information'}
+        description={`Room #${roomId}`}
+      >
+        <div className="space-y-4 pt-1">
+          {/* Discussion prompt in mobile info */}
+          {room?.room_description && (
+            <div className="p-3 rounded-xl bg-brand-500/10 border border-brand-500/20 space-y-1">
+              <span className="text-[10px] font-mono text-brand-600 dark:text-brand-400 uppercase tracking-wider font-semibold block">
+                Discussion Prompt
+              </span>
+              <p className="text-xs text-neutral-800 dark:text-neutral-200 italic leading-relaxed">
+                "{room.room_description}"
+              </p>
+            </div>
+          )}
+
+          <div className="p-3.5 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-neutral-500">Visibility</span>
+              <span className="font-mono text-neutral-800 dark:text-neutral-200 capitalize">
+                {room?.visibility || 'Public'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-500">Status</span>
+              <Badge variant={isRoomExpired ? 'expired' : room?.status === 'active' ? 'active' : 'closed'} size="sm">
+                {isRoomExpired ? 'Expired' : room?.status === 'active' ? 'Active' : 'Closed'}
+              </Badge>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-500">24-Hour Expiry</span>
+              <span className="font-mono font-semibold">{isRoomExpired ? 'Expired' : countdown.formatted}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-neutral-500">Total Submissions</span>
+              <span className="font-semibold">{messages.length} messages</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+              Shareable Link
+            </span>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={publicUrl}
+                className="w-full text-xs font-mono bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 px-3 py-2 rounded-lg select-all"
+              />
+              <Button
+                type="button"
+                variant={isCopied ? 'secondary' : 'primary'}
+                size="sm"
+                onClick={() => copy(publicUrl, 'Invite link copied!')}
+              >
+                {isCopied ? 'Copied' : 'Copy'}
+              </Button>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-neutral-200 dark:border-white/10">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full text-xs"
+              onClick={() => {
+                setIsMobileInfoOpen(false);
+                setIsManagePostsModalOpen(true);
+              }}
+              leftIcon={<KeyRound className="w-3.5 h-3.5" />}
+            >
+              {isEchoIdentityAuthenticated ? 'Manage My Posts' : 'Connect EchoBox ID'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Mobile Identity Sheet/Modal */}
+      <Modal
+        isOpen={isMobileIdentityOpen}
+        onClose={() => setIsMobileIdentityOpen(false)}
+        title="Your Anonymous Identity"
+        description="Your pseudonymous persona for this browser session."
+      >
+        <div className="space-y-4 pt-1">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10">
+            <Avatar name={identity.displayName} gradient={identity.gradient} size="lg" />
+            <div>
+              <p className="font-bold text-neutral-900 dark:text-white font-display">
+                {identity.displayName}
+              </p>
+              <p className="text-xs text-neutral-400">
+                Session: {identity.sessionId.slice(0, 12)}...
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+            All messages you send appear under this name. Change it anytime to speak as a different persona.
+          </p>
+
+          <Button
+            type="button"
+            variant="primary"
+            className="w-full text-xs"
+            onClick={() => {
+              setIsMobileIdentityOpen(false);
+              setIsChangeIdentityModalOpen(true);
+            }}
+            leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+          >
+            Change Anonymous Identity
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Manage Posts Modal */}
+      <ManagePostsModal
+        isOpen={isManagePostsModalOpen}
+        onClose={() => setIsManagePostsModalOpen(false)}
       />
     </div>
   );

@@ -1,26 +1,107 @@
 import { sendEchoRequest } from './client';
 import {
+  ClaimLegacyRoomResponse,
   CloseRoomResponse,
   CreateRoomResponse,
   DeleteFeedbackResponse,
+  DeleteMyPostResponse,
+  DiscoverRoomsResponse,
   GetFeedbackResponse,
+  GetMyPostsResponse,
+  GetOwnerRoomsResponse,
   GetRoomResponse,
+  ReopenRoomResponse,
   RoomMetadata,
+  RoomVisibility,
   SubmitFeedbackResponse,
+  UserPost,
 } from './types';
 
 export const echoService = {
   /**
-   * Creates a new anonymous feedback room.
+   * Creates a new anonymous feedback room with discussion prompt and visibility.
    */
-  async createRoom(roomName: string): Promise<CreateRoomResponse> {
-    const trimmed = roomName.trim();
-    if (!trimmed) {
+  async createRoom(
+    roomName: string,
+    roomDescription: string,
+    visibility: RoomVisibility = 'public'
+  ): Promise<CreateRoomResponse> {
+    const trimmedName = roomName.trim();
+    if (!trimmedName) {
       throw new Error('Room name cannot be empty');
     }
+    const trimmedDesc = roomDescription.trim();
+    if (!trimmedDesc) {
+      throw new Error('Room description or discussion prompt cannot be empty');
+    }
+
     return sendEchoRequest<CreateRoomResponse>({
       action: 'create_room',
-      room_name: trimmed,
+      room_name: trimmedName,
+      room_description: trimmedDesc,
+      visibility,
+    });
+  },
+
+  /**
+   * Discovers active public rooms for discussion.
+   */
+  async discoverRooms(searchQuery?: string): Promise<RoomMetadata[]> {
+    const payload: any = { action: 'discover_rooms' };
+    if (searchQuery && searchQuery.trim()) {
+      payload.search = searchQuery.trim();
+    }
+    const res = await sendEchoRequest<DiscoverRoomsResponse>(payload);
+    return res.rooms || [];
+  },
+
+  /**
+   * Retrieves all messages submitted by the current authenticated EchoBox identity.
+   */
+  async getMyPosts(): Promise<UserPost[]> {
+    const res = await sendEchoRequest<GetMyPostsResponse>({
+      action: 'get_my_posts',
+    });
+    return res.posts || [];
+  },
+
+  /**
+   * Deletes a user's own submitted post across devices.
+   */
+  async deleteMyPost(roomId: string, feedbackId: string): Promise<DeleteMyPostResponse> {
+    const cleanRoom = roomId.trim();
+    const cleanFb = feedbackId.trim();
+    if (!cleanRoom || !cleanFb) {
+      throw new Error('Room ID and Message ID are required');
+    }
+    return sendEchoRequest<DeleteMyPostResponse>({
+      action: 'delete_my_post',
+      room_id: cleanRoom,
+      feedback_id: cleanFb,
+    });
+  },
+
+  /**
+   * Retrieves all rooms belonging to the authenticated owner from DynamoDB.
+   */
+  async getOwnerRooms(): Promise<RoomMetadata[]> {
+    const response = await sendEchoRequest<GetOwnerRoomsResponse>({
+      action: 'get_owner_rooms',
+    });
+    return response.rooms || [];
+  },
+
+  /**
+   * Claims an unowned legacy room into the authenticated owner's workspace.
+   */
+  async claimLegacyRoom(roomId: string): Promise<ClaimLegacyRoomResponse> {
+    const cleanId = roomId.trim();
+    if (!cleanId) {
+      throw new Error('Room ID is required');
+    }
+    return sendEchoRequest<ClaimLegacyRoomResponse>({
+      action: 'claim_legacy_room',
+      room_id: cleanId,
     });
   },
 
@@ -36,64 +117,56 @@ export const echoService = {
       action: 'get_room',
       room_id: cleanId,
     });
-
-    return {
-      room_id: cleanId,
-      room_name: response.room.room_name,
-      created_at: response.room.created_at,
-      status: response.room.status,
-      PK: response.room.PK,
-      SK: response.room.SK,
-    };
+    return response.room;
   },
 
   /**
-   * Submits an anonymous message to an active room with optional identity metadata.
+   * Submits anonymous feedback / conversation message into a room.
    */
   async submitFeedback(
     roomId: string,
     message: string,
-    options?: { displayName?: string; sessionId?: string }
+    identity?: { displayName?: string; sessionId?: string }
   ): Promise<SubmitFeedbackResponse> {
-    const cleanRoomId = roomId.trim();
+    const cleanId = roomId.trim();
     const cleanMessage = message.trim();
 
-    if (!cleanRoomId) {
+    if (!cleanId) {
       throw new Error('Room ID is required');
     }
     if (!cleanMessage) {
       throw new Error('Message cannot be empty');
     }
     if (cleanMessage.length > 2000) {
-      throw new Error('Message exceeds the 2000 character maximum limit');
+      throw new Error('Message cannot exceed 2000 characters');
     }
 
     return sendEchoRequest<SubmitFeedbackResponse>({
       action: 'submit_feedback',
-      room_id: cleanRoomId,
+      room_id: cleanId,
       message: cleanMessage,
-      ...(options?.displayName ? { display_name: options.displayName } : {}),
-      ...(options?.sessionId ? { anonymous_session_id: options.sessionId } : {}),
+      display_name: identity?.displayName,
+      anonymous_session_id: identity?.sessionId,
     });
   },
 
   /**
-   * Retrieves all anonymous feedback items submitted to a room.
+   * Retrieves all messages for a room.
    */
-  async getFeedback(roomId: string): Promise<GetFeedbackResponse> {
-    const cleanRoomId = roomId.trim();
-    if (!cleanRoomId) {
+  async getFeedback(roomId: string, ownerMode = false): Promise<GetFeedbackResponse> {
+    const cleanId = roomId.trim();
+    if (!cleanId) {
       throw new Error('Room ID is required');
     }
-
     return sendEchoRequest<GetFeedbackResponse>({
       action: 'get_feedback',
-      room_id: cleanRoomId,
+      room_id: cleanId,
+      owner_mode: ownerMode,
     });
   },
 
   /**
-   * Deletes a specific feedback item from a room.
+   * Deletes a feedback item from a room (Room Owner operation).
    */
   async deleteFeedback(roomId: string, feedbackId: string): Promise<DeleteFeedbackResponse> {
     const cleanRoomId = roomId.trim();
@@ -111,18 +184,30 @@ export const echoService = {
   },
 
   /**
-   * Closes a room, preventing further feedback submissions.
+   * Closes a room to stop further feedback submissions (Room Owner operation).
    */
   async closeRoom(roomId: string): Promise<CloseRoomResponse> {
-    const cleanRoomId = roomId.trim();
-    if (!cleanRoomId) {
+    const cleanId = roomId.trim();
+    if (!cleanId) {
       throw new Error('Room ID is required');
     }
-
     return sendEchoRequest<CloseRoomResponse>({
       action: 'close_room',
-      room_id: cleanRoomId,
+      room_id: cleanId,
+    });
+  },
+
+  /**
+   * Reopens a closed room before its 24-hour expiration (Room Owner operation).
+   */
+  async reopenRoom(roomId: string): Promise<ReopenRoomResponse> {
+    const cleanId = roomId.trim();
+    if (!cleanId) {
+      throw new Error('Room ID is required');
+    }
+    return sendEchoRequest<ReopenRoomResponse>({
+      action: 'reopen_room',
+      room_id: cleanId,
     });
   },
 };
-

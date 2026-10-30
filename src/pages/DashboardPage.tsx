@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Plus,
   MessageSquare,
@@ -7,136 +7,139 @@ import {
   Search,
   Inbox,
   RefreshCw,
-  ShieldAlert,
+  Link2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/common/Button';
+import { Modal } from '@/components/common/Modal';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { RoomCard } from '@/components/dashboard/RoomCard';
 import { CreateRoomModal } from '@/components/dashboard/CreateRoomModal';
 import { echoService } from '@/api/echoService';
+import { RoomMetadata } from '@/api/types';
 
 export const DashboardPage: React.FC = () => {
-  const { managedRooms, isAuthenticated, login } = useAuth();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useAuth();
+  const [rooms, setRooms] = useState<RoomMetadata[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [totalFeedbackSum, setTotalFeedbackSum] = useState<number>(0);
-  const [activeRoomsCount, setActiveRoomsCount] = useState<number>(0);
-  const [refreshTick, setRefreshTick] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Auto-initialize demo owner session for prototype preview if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      login('guest-owner@echobox.dev', 'echobox2026!').catch(() => {});
-    }
-  }, [isAuthenticated, login]);
+  // Modals
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [claimRoomId, setClaimRoomId] = useState('');
+  const [isClaiming, setIsClaiming] = useState(false);
 
-  // Aggregate feedback count and active room counts across user rooms
-  useEffect(() => {
-    let isMounted = true;
-    async function aggregateCounts() {
-      if (!managedRooms.length) {
-        setTotalFeedbackSum(0);
-        setActiveRoomsCount(0);
-        return;
+  // Fetch rooms from DynamoDB for the authenticated owner
+  const loadOwnerRooms = useCallback(async (showToast = false) => {
+    try {
+      setIsRefreshing(true);
+      const ownerRooms = await echoService.getOwnerRooms();
+      setRooms(ownerRooms);
+      if (showToast) {
+        toast.success(`Synchronized ${ownerRooms.length} spaces from DynamoDB`);
       }
-
-      try {
-        const [feedbackResults, roomResults] = await Promise.all([
-          Promise.allSettled(managedRooms.map((r) => echoService.getFeedback(r.roomId))),
-          Promise.allSettled(managedRooms.map((r) => echoService.getRoom(r.roomId))),
-        ]);
-
-        if (!isMounted) return;
-
-        let totalMessages = 0;
-        for (const res of feedbackResults) {
-          if (res.status === 'fulfilled' && res.value) {
-            totalMessages += res.value.count || res.value.feedback?.length || 0;
-          }
-        }
-        setTotalFeedbackSum(totalMessages);
-
-        let activeCount = 0;
-        for (const res of roomResults) {
-          if (res.status === 'fulfilled' && res.value?.status === 'active') {
-            activeCount++;
-          }
-        }
-        setActiveRoomsCount(activeCount);
-      } catch {
-        // Quiet network error
-      }
+    } catch (err: any) {
+      toast.error(err.message || 'Could not load your rooms from DynamoDB');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
     }
+  }, []);
 
-    aggregateCounts();
+  useEffect(() => {
+    loadOwnerRooms();
+  }, [loadOwnerRooms]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [managedRooms, refreshTick]);
+  // Aggregate stats
+  const totalMessages = useMemo(() => {
+    return rooms.reduce((acc, r) => acc + (r.message_count || r.feedback_count || 0), 0);
+  }, [rooms]);
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setRefreshTick((t) => t + 1);
-    setTimeout(() => setIsRefreshing(false), 600);
-  };
+  const activeRoomsCount = useMemo(() => {
+    const now = Math.floor(Date.now() / 1000);
+    return rooms.filter((r) => {
+      const isExpired = (r.expires_at && r.expires_at <= now) || r.is_expired;
+      return r.status === 'active' && !isExpired;
+    }).length;
+  }, [rooms]);
 
   const filteredRooms = useMemo(() => {
-    return managedRooms.filter((room) => {
-      const matchesSearch =
-        room.roomName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        room.roomId.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
+    return rooms.filter((room) => {
+      const q = searchQuery.toLowerCase();
+      return (
+        room.room_name.toLowerCase().includes(q) ||
+        room.room_id.toLowerCase().includes(q)
+      );
     });
-  }, [managedRooms, searchQuery]);
+  }, [rooms, searchQuery]);
+
+  const handleClaimRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanId = claimRoomId.trim();
+    if (!cleanId) {
+      toast.error('Please enter a valid room ID');
+      return;
+    }
+
+    try {
+      setIsClaiming(true);
+      await echoService.claimLegacyRoom(cleanId);
+      toast.success(`Room ${cleanId} successfully claimed into your workspace!`);
+      setClaimRoomId('');
+      setIsClaimModalOpen(false);
+      loadOwnerRooms();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to claim room. It may be claimed by another owner.');
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 min-h-[85dvh]">
-      {/* Backend Security Limitation / Architecture Notice */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-amber-700 dark:text-amber-300">
-        <div className="flex items-start gap-2.5">
-          <ShieldAlert className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <span className="font-semibold">Demo Owner Session — Architecture Boundary Ready:</span>
-            <p className="text-amber-800/80 dark:text-amber-300/80 leading-relaxed">
-              The existing AWS backend does not yet enforce AWS Cognito JWT validation on room creation, feedback retrieval, or room closure. Owner dashboard capabilities are currently running in prototype mode.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Header and Action Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono font-medium text-brand-500 uppercase tracking-wider">
-              Room Management
+              Owner Workspace
             </span>
             <span className="text-neutral-300 dark:text-neutral-700">•</span>
             <span className="text-xs text-neutral-400 dark:text-neutral-500">
-              AWS ap-south-1 Live
+              {user?.email}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-neutral-900 dark:text-white font-display tracking-tight mt-1">
-            Owner Workspace
+            Spaces & Conversations
           </h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl">
-            Create and monitor anonymous spaces, copy invite links for your audience, and review incoming conversations in real-time.
+            Create anonymous feedback spaces, monitor incoming conversation streams, and track 24-hour expiry lifecycles.
           </p>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap flex-shrink-0">
           <Button
+            variant="outline"
+            size="md"
+            onClick={() => setIsClaimModalOpen(true)}
+            leftIcon={<Link2 className="w-4 h-4" />}
+            className="flex-shrink-0"
+          >
+            Claim Room
+          </Button>
+
+          <Button
             variant="secondary"
             size="md"
-            onClick={handleRefresh}
+            onClick={() => loadOwnerRooms(true)}
             isLoading={isRefreshing}
             leftIcon={<RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />}
             className="flex-shrink-0"
           >
-            Refresh
+            Sync
           </Button>
 
           <Button
@@ -155,24 +158,24 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <StatCard
           label="Total Managed Spaces"
-          value={managedRooms.length}
+          value={isLoading ? '—' : rooms.length}
           icon={Layers}
           accentColor="indigo"
-          subtext="Configured spaces"
+          subtext="Persistent across sessions"
         />
         <StatCard
           label="Total Messages"
-          value={totalFeedbackSum}
+          value={isLoading ? '—' : totalMessages}
           icon={MessageSquare}
           accentColor="brand"
-          subtext="Aggregated submissions"
+          subtext="Live feedback received"
         />
         <StatCard
           label="Active Spaces"
-          value={activeRoomsCount || managedRooms.length}
+          value={isLoading ? '—' : activeRoomsCount}
           icon={Radio}
           accentColor="emerald"
-          subtext="Accepting public messages"
+          subtext="Accepting chat messages"
         />
       </div>
 
@@ -198,20 +201,32 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Rooms Grid / Empty State */}
-      {filteredRooms.length > 0 ? (
+      {/* Rooms Grid / Loading / Empty State */}
+      {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRooms.map((room) => (
-            <RoomCard
-              key={room.roomId}
-              roomId={room.roomId}
-              initialRoomName={room.roomName}
-              initialCreatedAt={room.createdAt}
-              onRoomUpdated={() => setRefreshTick((t) => t + 1)}
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-64 rounded-2xl border border-neutral-200 dark:border-white/10 bg-white/40 dark:bg-white/5 animate-pulse p-6 space-y-4"
             />
           ))}
         </div>
-      ) : managedRooms.length === 0 ? (
+      ) : filteredRooms.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRooms.map((room) => (
+            <RoomCard
+              key={room.room_id}
+              roomId={room.room_id}
+              initialRoomName={room.room_name}
+              initialCreatedAt={room.created_at}
+              initialExpiresAt={room.expires_at}
+              initialStatus={room.is_expired ? 'expired' : room.status}
+              initialFeedbackCount={room.message_count || room.feedback_count}
+              onRoomUpdated={() => loadOwnerRooms()}
+            />
+          ))}
+        </div>
+      ) : rooms.length === 0 ? (
         /* Empty State */
         <div className="rounded-2xl border border-dashed border-neutral-300 dark:border-white/15 bg-white/40 dark:bg-[#121212]/40 backdrop-blur-sm p-12 text-center space-y-5">
           <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-brand-500 flex items-center justify-center mx-auto">
@@ -225,7 +240,15 @@ export const DashboardPage: React.FC = () => {
               Create your first space to generate a shareable link. Anyone with the URL can jump into the anonymous group chat without logging in.
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setIsClaimModalOpen(true)}
+              leftIcon={<Link2 className="w-4 h-4" />}
+            >
+              Claim Existing Room
+            </Button>
             <Button
               variant="primary"
               size="md"
@@ -248,8 +271,59 @@ export const DashboardPage: React.FC = () => {
       <CreateRoomModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onRoomCreated={() => setRefreshTick((t) => t + 1)}
+        onRoomCreated={() => loadOwnerRooms()}
       />
+
+      {/* Claim Legacy Room Modal */}
+      <Modal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        title="Claim Room into Workspace"
+        description="Adopt an unowned room into your authenticated workspace by its 8-character Room ID."
+      >
+        <form onSubmit={handleClaimRoom} className="space-y-4 pt-1">
+          <div className="space-y-1.5">
+            <label
+              htmlFor="claim-id"
+              className="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300"
+            >
+              Room ID
+            </label>
+            <input
+              id="claim-id"
+              type="text"
+              required
+              maxLength={16}
+              value={claimRoomId}
+              onChange={(e) => setClaimRoomId(e.target.value)}
+              placeholder="e.g. f485b2d4"
+              className="w-full h-11 px-4 rounded-xl border border-neutral-300 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/80 text-neutral-900 dark:text-white font-mono text-sm focus-visible:outline-2 focus-visible:outline-brand-500 transition-colors"
+            />
+            <p className="text-[11px] text-neutral-400">
+              Only unowned rooms can be claimed. Once claimed, this room will permanently belong to your account.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-100 dark:border-white/5">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsClaimModalOpen(false)}
+              disabled={isClaiming}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isClaiming}
+              leftIcon={<Link2 className="w-4 h-4" />}
+            >
+              Claim Room
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

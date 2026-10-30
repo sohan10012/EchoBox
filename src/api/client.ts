@@ -1,4 +1,6 @@
 import { EchoApiRequest } from './types';
+import { cognitoAuth } from '@/services/cognitoAuth';
+import { echoIdentityAuth } from '@/services/echoIdentityAuth';
 
 // Retrieve base URL from environment variable with safe production fallback
 const API_BASE_URL: string =
@@ -22,9 +24,9 @@ export class EchoApiError extends Error {
  */
 export async function sendEchoRequest<T>(
   payload: EchoApiRequest,
-  options: { timeoutMs?: number; signal?: AbortSignal } = {}
+  options: { timeoutMs?: number; signal?: AbortSignal; authToken?: string } = {}
 ): Promise<T> {
-  const { timeoutMs = 12000, signal: externalSignal } = options;
+  const { timeoutMs = 12000, signal: externalSignal, authToken: customToken } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -34,12 +36,21 @@ export async function sendEchoRequest<T>(
     externalSignal.addEventListener('abort', () => controller.abort());
   }
 
+  const token =
+    customToken ||
+    echoIdentityAuth.getIdToken() ||
+    cognitoAuth.getIdToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   try {
     const response = await fetch(API_BASE_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(payload),
       signal: controller.signal,
     });

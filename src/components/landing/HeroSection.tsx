@@ -1,34 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Shield, EyeOff } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowRight, Compass, PlusCircle, FolderOpen, RefreshCw, Hash } from 'lucide-react';
 import { Button } from '@/components/common/Button';
+import { Avatar } from '@/components/common/Avatar';
+import { useAnonymousIdentity } from '@/hooks/useAnonymousIdentity';
+import { CreateRoomModal } from '@/components/dashboard/CreateRoomModal';
+import { ChangeIdentityModal } from '@/components/chat/ChangeIdentityModal';
 
 export const HeroSection: React.FC = () => {
+  const { identity, changeIdentity } = useAnonymousIdentity();
+  const navigate = useNavigate();
+
+  const [roomIdInput, setRoomIdInput] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isChangeIdentityOpen, setIsChangeIdentityOpen] = useState(false);
+  const [inputError, setInputError] = useState<string | null>(null);
+
+  const handleJoinRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanId = roomIdInput.trim();
+    if (!cleanId) {
+      setInputError('Please enter a room ID');
+      return;
+    }
+    // Remove leading # if user typed it
+    const formattedId = cleanId.replace(/^#/, '');
+    navigate(`/room/${formattedId}`);
+  };
+
   return (
-    <section className="relative pt-20 pb-16 md:pt-28 md:pb-24 overflow-hidden">
+    <section className="relative pt-16 pb-16 md:pt-24 md:pb-20 overflow-hidden">
       {/* Soft ambient lighting spotlights */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-brand-500/15 via-indigo-500/10 to-transparent blur-3xl pointer-events-none -z-10 rounded-full"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-gradient-to-b from-brand-500/15 via-emerald-500/10 to-transparent blur-3xl pointer-events-none -z-10 rounded-full"
         aria-hidden="true"
       />
       <div
-        className="absolute -top-24 right-1/4 w-[350px] h-[250px] bg-emerald-500/10 blur-3xl pointer-events-none -z-10 rounded-full"
+        className="absolute -top-24 right-1/4 w-[350px] h-[250px] bg-teal-500/10 blur-3xl pointer-events-none -z-10 rounded-full"
         aria-hidden="true"
       />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8">
-        {/* Subtle pill tag */}
+        {/* Subtle pill tag displaying active visitor persona */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-neutral-200 dark:border-white/10 bg-white/60 dark:bg-neutral-900/60 backdrop-blur-md text-xs font-medium text-neutral-700 dark:text-neutral-300 shadow-sm"
+          className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-neutral-200/90 dark:border-white/10 bg-white/70 dark:bg-neutral-900/80 backdrop-blur-md text-xs text-neutral-700 dark:text-neutral-300 shadow-sm"
         >
-          <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
-          <span>Real thoughts without identity friction</span>
-          <span className="text-neutral-300 dark:text-neutral-600">|</span>
-          <span className="text-neutral-500 dark:text-neutral-400">100% Confidential</span>
+          <Avatar name={identity.displayName} gradient={identity.gradient} size="xs" />
+          <span>
+            Browsing as <strong className="font-semibold text-neutral-900 dark:text-white">{identity.displayName}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsChangeIdentityOpen(true)}
+            className="text-brand-500 hover:text-brand-400 font-semibold inline-flex items-center gap-1 ml-1"
+            title="Change your anonymous pseudonym"
+          >
+            <RefreshCw className="w-3 h-3" />
+            <span>Change</span>
+          </button>
         </motion.div>
 
         {/* Hero Headline */}
@@ -49,63 +82,124 @@ export const HeroSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.16, ease: 'easeOut' }}
-          className="text-lg sm:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto leading-relaxed font-normal"
+          className="text-base sm:text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto leading-relaxed font-normal"
         >
-          Create your space. Share your link. Receive honest anonymous feedback.
-          No awkward conversations. Just real thoughts.
+          Join focused group conversations with zero sign-up or tracking. Enter a room ID, explore public topics, or launch your own 24-hour anonymous space.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* Enter Room ID Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.24, ease: 'easeOut' }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
+          transition={{ duration: 0.55, delay: 0.22, ease: 'easeOut' }}
+          className="max-w-md mx-auto"
         >
-          <Link to="/dashboard" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              variant="primary"
-              className="w-full sm:w-auto font-semibold px-8 h-12 shadow-glow hover:scale-[1.02] active:scale-[0.98]"
-              rightIcon={<ArrowRight className="w-4 h-4 ml-1" />}
-            >
-              Get Started
-            </Button>
-          </Link>
-
-          <a href="#how-it-works" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              variant="secondary"
-              className="w-full sm:w-auto px-7 h-12"
-            >
-              See How It Works
-            </Button>
-          </a>
+          <form onSubmit={handleJoinRoom} className="space-y-2">
+            <div className="flex items-center gap-2 p-1.5 rounded-2xl border border-neutral-300 dark:border-white/15 bg-white dark:bg-[#121212] shadow-sm focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all">
+              <div className="pl-3 text-neutral-400">
+                <Hash className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                value={roomIdInput}
+                onChange={(e) => {
+                  setRoomIdInput(e.target.value);
+                  if (inputError) setInputError(null);
+                }}
+                placeholder="Enter 8-digit Room ID (e.g. b078960a)"
+                className="w-full h-10 bg-transparent text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none font-mono"
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="h-10 px-5 flex-shrink-0 font-semibold shadow-glow-sm"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5 ml-1" />}
+              >
+                Join Room
+              </Button>
+            </div>
+            {inputError && (
+              <p className="text-xs text-rose-500 font-medium text-left px-2 animate-fade-in">
+                {inputError}
+              </p>
+            )}
+          </form>
         </motion.div>
 
-        {/* Quick credibility proofs */}
+        {/* Action Buttons Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.28, ease: 'easeOut' }}
+          className="flex flex-wrap items-center justify-center gap-3 pt-2"
+        >
+          <a href="#explore">
+            <Button
+              size="md"
+              variant="secondary"
+              className="h-11 px-6 font-semibold"
+              leftIcon={<Compass className="w-4 h-4 text-brand-500" />}
+            >
+              Explore Public Rooms
+            </Button>
+          </a>
+
+          <Button
+            size="md"
+            variant="outline"
+            className="h-11 px-6 font-semibold"
+            onClick={() => setIsCreateModalOpen(true)}
+            leftIcon={<PlusCircle className="w-4 h-4 text-brand-500" />}
+          >
+            Create Discussion Space
+          </Button>
+
+          <Link to="/my-posts">
+            <Button
+              size="md"
+              variant="ghost"
+              className="h-11 px-5 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+              leftIcon={<FolderOpen className="w-4 h-4" />}
+            >
+              Manage My Posts (Optional)
+            </Button>
+          </Link>
+        </motion.div>
+
+        {/* Clean trust indicators */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.35 }}
-          className="pt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-medium text-neutral-500 dark:text-neutral-400"
+          className="pt-6 border-t border-neutral-200/60 dark:border-white/5 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-neutral-500 dark:text-neutral-400"
         >
           <div className="flex items-center gap-2">
-            <EyeOff className="w-4 h-4 text-brand-500" />
-            <span>Zero Sign-up for Senders</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Zero Mandatory Registration</span>
           </div>
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-brand-500" />
-            <span>Continuous Group Chat</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Automatic 24-Hour Expiry</span>
           </div>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-brand-500" />
-            <span>Instant Room Creation</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Pure Browser Persona</span>
           </div>
         </motion.div>
       </div>
+
+      <CreateRoomModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
+
+      <ChangeIdentityModal
+        isOpen={isChangeIdentityOpen}
+        onClose={() => setIsChangeIdentityOpen(false)}
+        currentIdentity={identity}
+        onConfirmChange={changeIdentity}
+      />
     </section>
   );
 };
-
