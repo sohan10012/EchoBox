@@ -87,3 +87,4 @@ The EchoBox frontend has been architected to isolate private functionality behin
 - `AuthService` abstraction in `src/context/AuthContext.tsx` can be switched from `DemoAuthServiceImpl` to `CognitoAuthServiceImpl` (using `@aws-amplify/auth` or Amazon Cognito SDK) without changing UI components.
 - The Public Room Chat (`/room/:roomId`) requires **zero authentication** and communicates cleanly through the public actions.
 - The Owner Dashboard clearly highlights prototype mode so users understand that authorization is not yet enforced on the remote AWS backend.
+

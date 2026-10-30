@@ -4,7 +4,6 @@ import { Toaster } from 'sonner';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { Navbar } from '@/components/common/Navbar';
-import { Footer } from '@/components/common/Footer';
 import { LandingPage } from '@/pages/LandingPage';
 import { AuthPage } from '@/pages/AuthPage';
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -31,7 +30,6 @@ const AppContent: React.FC = () => {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      <Footer />
       <Toaster
         position="top-right"
         theme={theme}

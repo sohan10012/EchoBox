@@ -180,3 +180,4 @@ export const anonymousIdentityService = {
     return () => window.removeEventListener(IDENTITY_CHANGED_EVENT, handler);
   },
 };
+

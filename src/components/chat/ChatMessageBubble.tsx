@@ -84,3 +84,4 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
     </div>
   );
 };
+
