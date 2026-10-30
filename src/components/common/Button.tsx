@@ -26,22 +26,22 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const sizeClasses = {
-      sm: 'h-9 px-3.5 text-xs font-medium rounded-lg gap-1.5',
-      md: 'h-11 px-5 text-sm font-medium rounded-xl gap-2',
-      lg: 'h-13 px-7 text-base font-semibold rounded-xl gap-2.5',
+      sm: 'h-9 px-4 text-xs font-medium rounded-full gap-1.5',
+      md: 'h-11 px-5 text-sm font-semibold rounded-full gap-2',
+      lg: 'h-13 px-7 text-base font-bold rounded-full gap-2.5',
     };
 
     const variantClasses = {
       primary:
-        'bg-white text-neutral-950 hover:bg-neutral-100 active:scale-[0.98] shadow-glow-sm hover:shadow-glow dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 border border-white/20',
+        'bg-[#00D99A] text-neutral-950 hover:bg-[#00c58b] active:scale-[0.98] font-bold border border-emerald-300/40 shadow-[0_4px_20px_rgba(0,217,154,0.35),inset_0_1px_0_0_rgba(255,255,255,0.4)] hover:shadow-[0_6px_28px_rgba(0,217,154,0.5)]',
       secondary:
-        'bg-neutral-100 text-neutral-900 hover:bg-neutral-200 active:scale-[0.98] dark:bg-neutral-900/90 dark:text-neutral-100 dark:hover:bg-neutral-800/90 border border-neutral-200/80 dark:border-white/10 shadow-sm',
+        'glass-pill text-white active:scale-[0.98]',
       outline:
-        'bg-transparent text-neutral-800 hover:bg-neutral-100/70 active:scale-[0.98] dark:text-neutral-200 dark:hover:bg-white/5 border border-neutral-300 dark:border-white/15',
+        'bg-transparent hover:bg-white/[0.06] text-neutral-200 hover:text-white border border-white/15 hover:border-white/25 active:scale-[0.98] shadow-sm',
       ghost:
-        'bg-transparent text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white',
+        'bg-transparent hover:bg-white/[0.06] text-neutral-400 hover:text-white active:scale-[0.98]',
       danger:
-        'bg-rose-600/10 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-500/20 active:scale-[0.98] dark:bg-rose-500/15 dark:text-rose-400 dark:hover:bg-rose-600 dark:hover:text-white',
+        'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-rose-200 border border-rose-500/30 active:scale-[0.98] shadow-sm',
     };
 
     return (

@@ -119,12 +119,12 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   return (
     <>
       <div
-        className={`group relative rounded-2xl border p-6 shadow-sm transition-all flex flex-col justify-between overflow-hidden ${
+        className={`group relative rounded-2xl border p-6 shadow-xl transition-all flex flex-col justify-between overflow-hidden ${
           status === 'active' && !isRoomExpired
-            ? 'border-neutral-200/90 dark:border-white/10 bg-white dark:bg-[#121212] hover:shadow-card-light dark:hover:shadow-card-dark'
+            ? 'border-white/10 bg-[#121614]/85 backdrop-blur-xl hover:border-[#00D99A]/40 hover:-translate-y-1'
             : isRoomExpired
-            ? 'border-neutral-200/60 dark:border-rose-500/15 bg-neutral-50/60 dark:bg-[#110e0e]/80 opacity-95'
-            : 'border-neutral-200/60 dark:border-amber-500/15 bg-neutral-50/60 dark:bg-[#0e0e0e]/80 opacity-90'
+            ? 'border-rose-500/20 bg-[#140e0e]/85 backdrop-blur-xl opacity-95'
+            : 'border-white/10 bg-[#121614]/70 backdrop-blur-xl opacity-90'
         }`}
       >
         {/* Top indicator bar */}

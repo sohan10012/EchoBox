@@ -314,11 +314,11 @@ export const PublicFeedbackPage: React.FC = () => {
         {/* LEFT COLUMN: Room Info & 24h Expiry Countdown (Desktop)  */}
         {/* ========================================================= */}
         <aside className="hidden lg:flex lg:col-span-3 flex-col gap-4 overflow-y-auto pr-1">
-          {/* Room Details Card */}
-          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-4 shadow-sm">
+          {/* Room Details Card with Glassmorphism */}
+          <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-5 space-y-4 shadow-xl">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-mono text-brand-500 uppercase tracking-wider font-semibold">
+                <span className="text-[11px] font-mono text-[#00D99A] uppercase tracking-wider font-semibold">
                   {room?.visibility === 'public' ? 'Public Room' : 'Private Space'}
                 </span>
                 <Badge
@@ -329,54 +329,54 @@ export const PublicFeedbackPage: React.FC = () => {
                   {isRoomExpired ? 'Expired' : room?.status === 'active' ? 'Active' : 'Closed'}
                 </Badge>
               </div>
-              <h2 className="text-lg font-bold text-neutral-900 dark:text-white font-display tracking-tight leading-snug">
+              <h2 className="text-lg font-bold text-white font-display tracking-tight leading-snug">
                 {room ? room.room_name : 'Loading Space...'}
               </h2>
             </div>
 
             {/* Discussion Prompt */}
             {room?.room_description && (
-              <div className="p-3 rounded-xl bg-neutral-100/80 dark:bg-white/[0.04] border border-neutral-200/60 dark:border-white/5 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-brand-600 dark:text-brand-400">
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-[#00D99A]">
                   <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
                   <span className="text-[10px] font-mono uppercase tracking-wider font-semibold">
                     Discussion Prompt
                   </span>
                 </div>
-                <p className="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed italic">
+                <p className="text-xs text-neutral-300 leading-relaxed italic">
                   "{room.room_description}"
                 </p>
               </div>
             )}
 
-            <div className="pt-2 border-t border-neutral-100 dark:border-white/5 space-y-2.5 text-xs">
-              <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
+            <div className="pt-2 border-t border-white/5 space-y-2.5 text-xs">
+              <div className="flex items-center justify-between text-neutral-400">
                 <span>Room Identifier</span>
                 <button
                   type="button"
                   onClick={copyRoomId}
                   title="Click to copy Room ID"
-                  className="inline-flex items-center gap-1 font-mono bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 px-2 py-0.5 rounded text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer group"
+                  className="inline-flex items-center gap-1 font-mono bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded text-neutral-200 transition-colors cursor-pointer group border border-white/5"
                 >
                   <span>#{roomId}</span>
                   {isIdCopied ? (
-                    <Check className="w-3 h-3 text-emerald-500" />
+                    <Check className="w-3 h-3 text-[#00D99A]" />
                   ) : (
                     <Copy className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
                   )}
                 </button>
               </div>
               {room?.created_at && (
-                <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
+                <div className="flex items-center justify-between text-neutral-400">
                   <span>Created</span>
                   <span title={formatFullDate(room.created_at)}>
                     {formatRelativeTime(room.created_at)}
                   </span>
                 </div>
               )}
-              <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
+              <div className="flex items-center justify-between text-neutral-400">
                 <span>Messages</span>
-                <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                <span className="font-semibold text-white">
                   {messages.length} submissions
                 </span>
               </div>
@@ -410,13 +410,13 @@ export const PublicFeedbackPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Invite & Share Card */}
-          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-4 space-y-3 shadow-sm">
+          {/* Invite & Share Card with Glassmorphism */}
+          <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 space-y-3 shadow-xl">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+              <span className="text-xs font-semibold text-neutral-300">
                 Invite & Share
               </span>
-              <span className="text-[10px] text-emerald-500 font-mono">Public Space</span>
+              <span className="text-[10px] text-[#00D99A] font-mono">Public Space</span>
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -424,7 +424,7 @@ export const PublicFeedbackPage: React.FC = () => {
                 type="text"
                 readOnly
                 value={publicUrl}
-                className="w-full text-[11px] font-mono text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-black/40 border border-neutral-200 dark:border-white/10 px-2.5 py-1.5 rounded-lg select-all"
+                className="w-full text-[11px] font-mono text-neutral-200 bg-black/40 border border-white/10 px-2.5 py-1.5 rounded-lg select-all"
               />
               <Button
                 type="button"
@@ -434,7 +434,7 @@ export const PublicFeedbackPage: React.FC = () => {
                 onClick={copyRoomLink}
                 title="Copy Room Link"
               >
-                {isLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                {isLinkCopied ? <Check className="w-3.5 h-3.5 text-[#00D99A]" /> : <Copy className="w-3.5 h-3.5" />}
               </Button>
             </div>
 
@@ -445,7 +445,7 @@ export const PublicFeedbackPage: React.FC = () => {
                 size="sm"
                 className="w-full text-xs h-8"
                 onClick={shareRoom}
-                leftIcon={<Share2 className="w-3.5 h-3.5 text-emerald-500" />}
+                leftIcon={<Share2 className="w-3.5 h-3.5 text-[#00D99A]" />}
               >
                 Share Room
               </Button>
@@ -455,7 +455,7 @@ export const PublicFeedbackPage: React.FC = () => {
                 size="sm"
                 className="w-full text-xs h-8"
                 onClick={copyRoomId}
-                leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-[#00D99A]" /> : <Copy className="w-3.5 h-3.5" />}
               >
                 {isIdCopied ? 'ID Copied' : 'Copy ID'}
               </Button>
@@ -471,8 +471,8 @@ export const PublicFeedbackPage: React.FC = () => {
         {/* CENTER COLUMN: Main Chat Conversation & Composer         */}
         {/* ========================================================= */}
         <main className="col-span-1 lg:col-span-6 flex flex-col h-full min-h-0 relative">
-          {/* Mobile Top Bar (Visible < lg) */}
-          <div className="lg:hidden flex-shrink-0 rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/85 dark:bg-[#121212]/90 backdrop-blur-md p-3 mb-2 shadow-sm flex items-center justify-between gap-2">
+          {/* Mobile Top Bar with Glassmorphism */}
+          <div className="lg:hidden flex-shrink-0 rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-3 mb-2 shadow-lg flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h1 className="text-sm font-bold text-neutral-900 dark:text-white font-display truncate">
                 {room ? room.room_name : 'Loading Room...'}
@@ -541,8 +541,8 @@ export const PublicFeedbackPage: React.FC = () => {
             </div>
           )}
 
-          {/* Conversation Region */}
-          <div className="relative flex-1 rounded-2xl border border-neutral-200/80 dark:border-white/10 bg-white/50 dark:bg-[#0c0c0c]/60 backdrop-blur-sm overflow-hidden flex flex-col mb-3">
+          {/* Conversation Region with Glassmorphism */}
+          <div className="relative flex-1 rounded-2xl border border-white/10 bg-[#0c100e]/75 backdrop-blur-xl overflow-hidden flex flex-col mb-3 shadow-inner">
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
@@ -579,7 +579,7 @@ export const PublicFeedbackPage: React.FC = () => {
               <button
                 type="button"
                 onClick={scrollToBottom}
-                className="absolute bottom-4 right-4 z-10 w-9 h-9 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+                className="absolute bottom-4 right-4 z-10 w-9 h-9 rounded-full bg-white text-neutral-900 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
                 aria-label="Scroll to newest messages"
               >
                 <ArrowDown className="w-4 h-4" />
@@ -603,13 +603,13 @@ export const PublicFeedbackPage: React.FC = () => {
         {/* RIGHT COLUMN: Anonymous Identity & Privacy Guidelines    */}
         {/* ========================================================= */}
         <aside className="hidden lg:flex lg:col-span-3 flex-col gap-4 overflow-y-auto pl-1">
-          {/* Persona Card */}
-          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-4 shadow-sm">
+          {/* Persona Card with Glassmorphism */}
+          <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
                 Your Persona
               </span>
-              <span className="text-[10px] font-mono text-neutral-500 bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
                 Tab Persistent
               </span>
             </div>
@@ -619,10 +619,10 @@ export const PublicFeedbackPage: React.FC = () => {
                 name={identity.displayName}
                 gradient={identity.gradient}
                 size="lg"
-                className="ring-2 ring-brand-500/20"
+                className="ring-2 ring-[#00D99A]/30"
               />
               <div className="min-w-0">
-                <p className="font-bold text-neutral-900 dark:text-white font-display text-base truncate">
+                <p className="font-bold text-white font-display text-base truncate">
                   {identity.displayName}
                 </p>
                 <p className="text-[11px] text-neutral-400 truncate">
@@ -631,7 +631,7 @@ export const PublicFeedbackPage: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+            <p className="text-xs text-neutral-300 leading-relaxed">
               All messages you post in this room will appear under this pseudonym. No personal data, email, or credentials are required.
             </p>
 
@@ -647,15 +647,15 @@ export const PublicFeedbackPage: React.FC = () => {
             </Button>
           </div>
 
-          {/* Manage My Posts Connection Card */}
-          <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-5 space-y-3 shadow-sm">
+          {/* Manage My Posts Connection Card with Glassmorphism */}
+          <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-5 space-y-3 shadow-xl">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 font-semibold text-xs">
+              <div className="flex items-center gap-1.5 text-[#00D99A] font-semibold text-xs">
                 <KeyRound className="w-3.5 h-3.5" />
                 <span>Manage My Posts</span>
               </div>
               {isEchoIdentityAuthenticated && (
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Connected" />
+                <span className="w-2 h-2 rounded-full bg-[#00D99A] animate-pulse" title="Connected" />
               )}
             </div>
 

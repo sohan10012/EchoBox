@@ -52,6 +52,147 @@
   }
 }
 
+/* ========================================================= */
+/* PREMIUM GLASSMORPHISM SYSTEM TOKENS & UTILITY CLASSES     */
+/* ========================================================= */
+
+.glass-panel {
+  background-color: rgba(18, 22, 20, 0.75);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+  background-color: rgba(18, 22, 20, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 217, 154, 0.3);
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.7), 0 0 24px -4px rgba(0, 217, 154, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-modal {
+  background-color: rgba(15, 18, 17, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-input {
+  background-color: rgba(10, 14, 12, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-input:focus-within,
+.glass-input:focus {
+  border-color: rgba(0, 217, 154, 0.6);
+  box-shadow: 0 0 0 3px rgba(0, 217, 154, 0.18), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.glass-pill {
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-pill:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Fallback for browsers that do not support backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-panel,
+  .glass-card,
+  .glass-modal,
+  .glass-input,
+  .glass-pill {
+    background-color: #121614 !important;
+  }
+}
+
+/* ========================================================= */
+/* ORGANIC FLOATING ANIMATIONS (GPU Accelerated)             */
+/* ========================================================= */
+
+@keyframes float-gentle-1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-3.5deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(-4.2deg);
+  }
+}
+
+@keyframes float-gentle-2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-0.5deg);
+  }
+}
+
+@keyframes float-gentle-3 {
+  0%, 100% {
+    transform: translateY(0px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2.8deg);
+  }
+}
+
+@keyframes float-sculpture {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-7px) scale(1.018);
+  }
+}
+
+.animate-float-1 {
+  animation: float-gentle-1 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-2 {
+  animation: float-gentle-2 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-3 {
+  animation: float-gentle-3 7.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-sculpture {
+  animation: float-sculpture 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Pause organic float on hover for comfortable reading */
+.hover-pause:hover {
+  animation-play-state: paused;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -61,6 +202,12 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .animate-float-1,
+  .animate-float-2,
+  .animate-float-3,
+  .animate-float-sculpture {
+    animation: none !important;
   }
 }
 

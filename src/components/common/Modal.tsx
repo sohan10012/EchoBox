@@ -64,7 +64,7 @@ export const Modal: React.FC<ModalProps> = ({
             aria-hidden="true"
           />
 
-          {/* Modal Card */}
+          {/* Modal Card with Premium Glassmorphism */}
           <motion.div
             role="dialog"
             aria-modal="true"
@@ -73,13 +73,13 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             className={cn(
-              'relative w-full z-10 rounded-2xl bg-white dark:bg-[#121212] border border-neutral-200 dark:border-white/10 shadow-2xl p-6 sm:p-8 overflow-hidden',
+              'relative w-full z-10 rounded-2xl glass-modal p-6 sm:p-8 overflow-hidden',
               maxWidthClasses[maxWidth],
               className
             )}
           >
-            {/* Ambient subtle glow at top of modal */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-brand-500/40 to-transparent pointer-events-none" />
+            {/* Ambient subtle green glow at top of modal */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-[#00D99A]/50 to-transparent pointer-events-none" />
 
             <div className="flex items-start justify-between gap-4 mb-5">
               <div className="space-y-1">

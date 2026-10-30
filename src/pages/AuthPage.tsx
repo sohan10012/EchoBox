@@ -97,15 +97,15 @@ export const AuthPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Auth Card */}
-        <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/90 dark:bg-[#121212]/95 backdrop-blur-md p-6 sm:p-8 shadow-card-light dark:shadow-card-dark space-y-6">
+        {/* Auth Card with Glassmorphism */}
+        <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-6">
           {/* Notice for anonymous visitors */}
-          <div className="p-3.5 rounded-xl bg-brand-500/10 border border-brand-500/20 text-xs text-brand-700 dark:text-brand-300 leading-relaxed">
-            <strong className="font-semibold">Joining an anonymous room?</strong> Visitors do not need an account or sign-up. If someone shared an EchoBox link with you, navigate directly to that room URL to start chatting.
+          <div className="p-3.5 rounded-xl bg-[#00D99A]/10 border border-[#00D99A]/20 text-xs text-neutral-200 leading-relaxed">
+            <strong className="font-semibold text-[#00D99A]">Joining an anonymous room?</strong> Visitors do not need an account or sign-up. If someone shared an EchoBox link with you, navigate directly to that room URL to start chatting.
           </div>
 
           {/* Tab Selector */}
-          <div className="grid grid-cols-2 p-1 rounded-xl bg-neutral-100 dark:bg-neutral-900/90 border border-neutral-200/60 dark:border-white/5">
+          <div className="grid grid-cols-2 p-1 rounded-xl bg-black/40 border border-white/5">
             <button
               type="button"
               onClick={() => {
@@ -113,10 +113,10 @@ export const AuthPage: React.FC = () => {
                 setErrorMessage(null);
                 window.history.replaceState(null, '', '/login');
               }}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 !isRegister
-                  ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
-                  : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                  ? 'bg-white/10 text-white shadow-sm border border-white/10'
+                  : 'text-neutral-400 hover:text-white'
               }`}
             >
               Sign In
@@ -128,10 +128,10 @@ export const AuthPage: React.FC = () => {
                 setErrorMessage(null);
                 window.history.replaceState(null, '', '/register');
               }}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 isRegister
-                  ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm'
-                  : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                  ? 'bg-white/10 text-white shadow-sm border border-white/10'
+                  : 'text-neutral-400 hover:text-white'
               }`}
             >
               Sign Up

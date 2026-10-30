@@ -359,7 +359,7 @@ export const ManagePostsPage: React.FC = () => {
             return (
               <div
                 key={post.feedback_id}
-                className="group relative rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white dark:bg-[#121212] p-5 sm:p-6 shadow-sm hover:shadow-card-light dark:hover:shadow-card-dark transition-all space-y-3"
+                className="group relative rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-5 sm:p-6 shadow-xl hover:border-[#00D99A]/40 transition-all space-y-3"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">

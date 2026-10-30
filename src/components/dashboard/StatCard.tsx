@@ -27,7 +27,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   };
 
   return (
-    <div className="p-6 rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white dark:bg-[#121212] shadow-sm relative overflow-hidden transition-all hover:border-neutral-300 dark:hover:border-white/20">
+    <div className="p-6 rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl shadow-xl relative overflow-hidden transition-all hover:border-[#00D99A]/40">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">

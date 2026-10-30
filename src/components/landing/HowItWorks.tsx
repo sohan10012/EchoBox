@@ -62,7 +62,7 @@ export const HowItWorks: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.15 }}
-                className="relative rounded-2xl border border-neutral-200/80 dark:border-white/10 bg-white/70 dark:bg-[#121212]/70 backdrop-blur-sm p-7 space-y-5 hover:border-neutral-300 dark:hover:border-white/20 transition-all group"
+                className="relative rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-7 space-y-5 hover:border-[#00D99A]/30 transition-all group shadow-xl"
               >
                 {/* Step badge & icon */}
                 <div className="flex items-center justify-between">

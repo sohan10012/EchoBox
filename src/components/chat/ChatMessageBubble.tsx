@@ -70,12 +70,12 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
           </span>
         </div>
 
-        {/* Message Bubble */}
+        {/* Message Bubble with Glassmorphism */}
         <div
-          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap shadow-sm transition-colors ${
+          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed break-words whitespace-pre-wrap shadow-sm transition-colors backdrop-blur-md ${
             isCurrentUser
-              ? 'bg-neutral-900 text-white dark:bg-neutral-800 dark:text-white rounded-tr-sm border border-neutral-800 dark:border-white/10'
-              : 'bg-white text-neutral-900 dark:bg-[#161616] dark:text-[#ededed] rounded-tl-sm border border-neutral-200/90 dark:border-white/10'
+              ? 'bg-emerald-500/15 text-white rounded-tr-sm border border-emerald-500/30 shadow-[0_2px_12px_rgba(0,217,154,0.1)]'
+              : 'bg-[#141816]/85 text-neutral-100 rounded-tl-sm border border-white/10 shadow-sm'
           }`}
         >
           {message.message}

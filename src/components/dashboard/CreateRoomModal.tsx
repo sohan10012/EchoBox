@@ -128,7 +128,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               placeholder="e.g. GTA 6 Discussion, Q4 Design Critique, Team AMA"
-              className="w-full h-11 px-4 rounded-xl border border-neutral-300 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/80 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 text-sm focus-visible:outline-2 focus-visible:outline-brand-500 transition-colors"
+              className="w-full h-11 px-4 rounded-xl border border-white/10 bg-black/40 text-white placeholder-neutral-500 text-sm focus-visible:outline-2 focus-visible:outline-[#00D99A] focus:border-[#00D99A]/60 transition-colors"
             />
           </div>
 
@@ -137,7 +137,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
             <div className="flex items-center justify-between">
               <label
                 htmlFor="modal-room-desc"
-                className="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300"
+                className="block text-xs font-semibold uppercase tracking-wider text-neutral-300"
               >
                 Discussion Question / Prompt <span className="text-rose-500">*</span>
               </label>
@@ -153,7 +153,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               value={roomDescription}
               onChange={(e) => setRoomDescription(e.target.value)}
               placeholder="e.g. What do you think about GTA 6 and its upcoming release? Share your honest expectations, concerns, and predictions."
-              className="w-full p-3.5 rounded-xl border border-neutral-300 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/80 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 text-sm focus-visible:outline-2 focus-visible:outline-brand-500 transition-colors resize-none leading-relaxed"
+              className="w-full p-3.5 rounded-xl border border-white/10 bg-black/40 text-white placeholder-neutral-500 text-sm focus-visible:outline-2 focus-visible:outline-[#00D99A] focus:border-[#00D99A]/60 transition-colors resize-none leading-relaxed"
             />
             <p className="text-[11px] text-neutral-400">
               This prompt will be pinned at the top of the chat so all participants immediately understand what to discuss.
@@ -162,22 +162,22 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
 
           {/* Visibility Selector */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-300">
               Room Visibility
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => setVisibility('public')}
-                className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
+                className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 cursor-pointer ${
                   visibility === 'public'
-                    ? 'border-brand-500/80 bg-brand-500/10 text-neutral-900 dark:text-white ring-1 ring-brand-500/30'
-                    : 'border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900/60 text-neutral-600 dark:text-neutral-400'
+                    ? 'border-emerald-500/70 bg-emerald-500/15 text-white ring-1 ring-emerald-500/30'
+                    : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-neutral-400 hover:text-white'
                 }`}
               >
-                <Globe className={`w-4 h-4 mt-0.5 flex-shrink-0 ${visibility === 'public' ? 'text-brand-500' : ''}`} />
+                <Globe className={`w-4 h-4 mt-0.5 flex-shrink-0 ${visibility === 'public' ? 'text-[#00D99A]' : ''}`} />
                 <div>
-                  <p className="font-semibold text-xs">Public</p>
+                  <p className="font-semibold text-xs text-white">Public</p>
                   <p className="text-[10px] opacity-80 leading-tight">Discoverable on the Explore page</p>
                 </div>
               </button>
@@ -185,15 +185,15 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               <button
                 type="button"
                 onClick={() => setVisibility('private')}
-                className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
+                className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 cursor-pointer ${
                   visibility === 'private'
-                    ? 'border-brand-500/80 bg-brand-500/10 text-neutral-900 dark:text-white ring-1 ring-brand-500/30'
-                    : 'border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900/60 text-neutral-600 dark:text-neutral-400'
+                    ? 'border-emerald-500/70 bg-emerald-500/15 text-white ring-1 ring-emerald-500/30'
+                    : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06] text-neutral-400 hover:text-white'
                 }`}
               >
-                <Lock className={`w-4 h-4 mt-0.5 flex-shrink-0 ${visibility === 'private' ? 'text-brand-500' : ''}`} />
+                <Lock className={`w-4 h-4 mt-0.5 flex-shrink-0 ${visibility === 'private' ? 'text-[#00D99A]' : ''}`} />
                 <div>
-                  <p className="font-semibold text-xs">Private</p>
+                  <p className="font-semibold text-xs text-white">Private</p>
                   <p className="text-[10px] opacity-80 leading-tight">Only accessible with direct link</p>
                 </div>
               </button>
@@ -250,8 +250,8 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
             </div>
           </div>
 
-          {/* Room ID & Link Card */}
-          <div className="p-4 rounded-xl bg-neutral-100/90 dark:bg-neutral-900/90 border border-neutral-200 dark:border-white/10 space-y-3.5">
+          {/* Room ID & Link Card with Glassmorphism */}
+          <div className="p-4 rounded-xl bg-black/40 border border-white/10 backdrop-blur-md space-y-3.5 shadow-inner">
             {/* Room ID Row */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-neutral-200/70 dark:border-white/5">
               <div>

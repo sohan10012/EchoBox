@@ -27,24 +27,24 @@ const RoomCardItem: React.FC<RoomCardItemProps> = ({ room }) => {
   const isExpired = Boolean(room.is_expired || countdown.isExpired);
 
   return (
-    <div className="group relative rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white dark:bg-[#121212] p-6 shadow-sm hover:shadow-card-light dark:hover:shadow-card-dark transition-all flex flex-col justify-between overflow-hidden">
+    <div className="group relative rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-6 shadow-xl hover:border-[#00D99A]/40 hover:-translate-y-1 transition-all flex flex-col justify-between overflow-hidden">
       {/* Top indicator bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 group-hover:from-emerald-400 group-hover:to-teal-300 transition-colors" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400 group-hover:from-[#00D99A] group-hover:to-emerald-400 transition-colors" />
 
       <div className="space-y-4">
         {/* Header: Title and Status */}
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[11px] text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded">
+              <span className="font-mono text-[11px] text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
                 #{room.room_id}
               </span>
-              <span className="text-[11px] text-brand-500 font-medium flex items-center gap-1">
+              <span className="text-[11px] text-[#00D99A] font-medium flex items-center gap-1">
                 <Globe className="w-3 h-3" />
                 Public
               </span>
             </div>
-            <h3 className="text-lg font-bold text-neutral-900 dark:text-white font-display tracking-tight group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors line-clamp-1">
+            <h3 className="text-lg font-bold text-white font-display tracking-tight group-hover:text-[#00D99A] transition-colors line-clamp-1">
               {room.room_name}
             </h3>
           </div>
@@ -55,26 +55,26 @@ const RoomCardItem: React.FC<RoomCardItemProps> = ({ room }) => {
         </div>
 
         {/* Discussion Question / Prompt Box */}
-        <div className="p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200/70 dark:border-white/5 space-y-1">
+        <div className="p-3.5 rounded-xl bg-black/30 border border-white/5 space-y-1">
           <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 font-semibold block">
             Discussion Prompt
           </span>
-          <p className="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed line-clamp-3">
+          <p className="text-xs text-neutral-300 leading-relaxed line-clamp-3">
             {room.room_description || 'Open community feedback and candid peer discussion.'}
           </p>
         </div>
 
         {/* Metadata row */}
-        <div className="grid grid-cols-2 gap-2 py-2 border-y border-neutral-100 dark:border-white/5 text-xs">
-          <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
-            <MessageSquare className="w-3.5 h-3.5 text-brand-500" />
+        <div className="grid grid-cols-2 gap-2 py-2 border-y border-white/5 text-xs">
+          <div className="flex items-center gap-1.5 text-neutral-400">
+            <MessageSquare className="w-3.5 h-3.5 text-[#00D99A]" />
             <span>
               {room.message_count !== undefined ? room.message_count : 0} messages
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 justify-end font-mono">
-            <Clock className="w-3.5 h-3.5 text-emerald-500" />
+          <div className="flex items-center gap-1.5 text-neutral-400 justify-end font-mono">
+            <Clock className="w-3.5 h-3.5 text-[#00D99A]" />
             <span>{isExpired ? 'Expired' : countdown.formatted}</span>
           </div>
         </div>
@@ -86,7 +86,7 @@ const RoomCardItem: React.FC<RoomCardItemProps> = ({ room }) => {
           <Button
             variant="primary"
             size="sm"
-            className="w-full justify-center group-hover:shadow-glow-sm"
+            className="w-full justify-center"
             rightIcon={<ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />}
           >
             Join Conversation
@@ -174,17 +174,17 @@ export const PublicRoomsExplorer: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar with Glassmorphism */}
       <div className="relative max-w-lg">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-          <Search className="w-4 h-4" />
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-neutral-400">
+          <Search className="w-4 h-4 text-[#00D99A]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search topics, questions, or room names (e.g. GTA 6, AI)..."
-          className="w-full h-11 pl-10 pr-4 rounded-xl border border-neutral-300 dark:border-white/10 bg-white dark:bg-[#121212] text-neutral-900 dark:text-white placeholder-neutral-400 text-xs sm:text-sm focus-visible:outline-2 focus-visible:outline-brand-500 transition-colors shadow-sm"
+          className="w-full h-11 pl-11 pr-4 rounded-full border border-white/10 bg-[#121614]/85 backdrop-blur-xl text-neutral-900 dark:text-white placeholder-neutral-500 text-xs sm:text-sm focus-visible:outline-2 focus-visible:outline-[#00D99A] focus:border-[#00D99A]/60 transition-all shadow-sm"
         />
       </div>
 

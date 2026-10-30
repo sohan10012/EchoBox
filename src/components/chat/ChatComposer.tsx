@@ -139,11 +139,11 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         </button>
       </div>
 
-      {/* Composer Card */}
-      <div className="relative rounded-2xl border border-neutral-300 dark:border-white/10 bg-white dark:bg-[#121212] shadow-sm transition-all focus-within:border-brand-500/80 focus-within:ring-1 focus-within:ring-brand-500/30 overflow-hidden">
+      {/* Composer Card with Glassmorphism */}
+      <div className="relative rounded-2xl border border-white/12 bg-[#121614]/85 backdrop-blur-xl shadow-lg transition-all focus-within:border-[#00D99A]/70 focus-within:ring-2 focus-within:ring-[#00D99A]/20 overflow-hidden">
         {/* Error notification if any */}
         {errorMsg && (
-          <div className="px-4 py-2 bg-rose-500/10 border-b border-rose-500/20 flex items-center justify-between text-xs text-rose-600 dark:text-rose-400">
+          <div className="px-4 py-2 bg-rose-500/10 border-b border-rose-500/20 flex items-center justify-between text-xs text-rose-400">
             <span className="flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
               {errorMsg}
@@ -170,12 +170,12 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             onKeyDown={handleKeyDown}
             placeholder="Type your message anonymously... (Enter to send, Shift+Enter for new line)"
             maxLength={MAX_CHAR_LIMIT + 50}
-            className="w-full bg-transparent text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none resize-none leading-relaxed min-h-[44px]"
+            className="w-full bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none resize-none leading-relaxed min-h-[44px]"
           />
         </div>
 
         {/* Bottom toolbar */}
-        <div className="px-3 py-2 bg-neutral-50 dark:bg-neutral-900/40 border-t border-neutral-100 dark:border-white/5 flex items-center justify-between gap-3 text-xs">
+        <div className="px-3.5 py-2.5 bg-black/30 border-t border-white/5 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-neutral-400 dark:text-neutral-500">
             <span className={isOverLimit ? 'text-rose-500 font-bold' : ''}>
               {charCount}/{MAX_CHAR_LIMIT}
