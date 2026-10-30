@@ -56,37 +56,46 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Center Navigation Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-2">
             <Link
               to="/#explore"
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-full border transition-all flex items-center gap-1.5 ${
                 location.pathname === '/'
-                  ? 'text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5'
+                  ? 'text-white border-white/15 bg-white/10 shadow-sm'
+                  : 'text-neutral-400 border-white/5 bg-white/[0.03] hover:text-white hover:border-white/15 hover:bg-white/[0.08]'
               }`}
             >
-              <Compass className="w-4 h-4 text-brand-500" />
+              <Compass className="w-3.5 h-3.5 text-emerald-400" />
               <span>Explore Topics</span>
             </Link>
 
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-3.5 py-1.5 text-xs font-medium rounded-full border border-white/5 bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.08] text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <PlusCircle className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Create Space</span>
+            </button>
+
             <Link
               to="/my-posts"
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-full border transition-all flex items-center gap-1.5 ${
                 location.pathname === '/my-posts'
-                  ? 'text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5 font-semibold'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5'
+                  ? 'text-white border-emerald-500/30 bg-emerald-500/10'
+                  : 'text-neutral-400 border-white/5 bg-white/[0.03] hover:text-white hover:border-white/15 hover:bg-white/[0.08]'
               }`}
             >
-              <FolderOpen className="w-4 h-4 text-brand-500" />
+              <FolderOpen className="w-3.5 h-3.5 text-emerald-400" />
               <span>Manage My Posts</span>
             </Link>
 
             <Link
               to="/dashboard"
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-full border transition-all flex items-center gap-1.5 ${
                 location.pathname === '/dashboard'
-                  ? 'text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5 font-semibold'
-                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5'
+                  ? 'text-white border-white/15 bg-white/10'
+                  : 'text-neutral-400 border-white/5 bg-white/[0.03] hover:text-white hover:border-white/15 hover:bg-white/[0.08]'
               }`}
             >
               <span>Owner Spaces</span>
@@ -95,29 +104,27 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Anonymous Persona Pill (Always Visible) */}
+            {/* Anonymous Persona Pill (Matching Reference) */}
             <button
               type="button"
               onClick={() => setIsChangeIdentityOpen(true)}
               title="Click to change your anonymous persona"
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-neutral-200/80 dark:border-white/10 bg-neutral-100/70 dark:bg-neutral-900/90 hover:border-brand-500/40 transition-colors text-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-400/50 hover:bg-emerald-900/30 transition-all text-xs text-neutral-200"
             >
-              <Avatar
-                name={identity.displayName}
-                gradient={identity.gradient}
-                size="xs"
-              />
-              <span className="font-semibold text-neutral-800 dark:text-neutral-200 font-display hidden sm:inline max-w-[120px] truncate">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold font-mono">
+                {identity.displayName.slice(0, 2).toUpperCase()}
+              </span>
+              <span className="font-medium text-neutral-200 font-display hidden sm:inline max-w-[120px] truncate text-xs">
                 {identity.displayName}
               </span>
-              <RefreshCw className="w-3 h-3 text-neutral-400 hover:text-brand-500" />
+              <RefreshCw className="w-3 h-3 text-emerald-400/70 hover:text-emerald-300 ml-0.5" />
             </button>
 
             {/* EchoBox ID Connected Badge (Optional) */}
             {isEchoIdentityAuthenticated && echoIdentity && (
               <Link
                 to="/my-posts"
-                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 font-mono text-[11px] text-emerald-600 dark:text-emerald-400 font-medium"
+                className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 font-mono text-[11px] text-emerald-400 font-medium"
                 title="Active EchoBox ID"
               >
                 <KeyRound className="w-3 h-3" />
@@ -129,26 +136,25 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 border border-neutral-200/80 dark:border-white/10 transition-colors focus-visible:outline-2 focus-visible:outline-brand-500"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 border border-white/10 transition-colors focus-visible:outline-2 focus-visible:outline-brand-500"
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
               {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400 transition-transform hover:rotate-45" />
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
               ) : (
-                <Moon className="w-4 h-4 text-neutral-700 transition-transform hover:-rotate-12" />
+                <Moon className="w-3.5 h-3.5 text-neutral-300" />
               )}
             </button>
 
-            {/* Single Primary Action: Create Space button (Desktop) */}
-            <Button
-              variant="primary"
-              size="sm"
+            {/* Primary Action Button: White pill with black text */}
+            <button
+              type="button"
               onClick={() => setIsCreateModalOpen(true)}
-              className="hidden sm:inline-flex shadow-glow-sm"
-              leftIcon={<PlusCircle className="w-3.5 h-3.5" />}
+              className="hidden sm:inline-flex items-center gap-1.5 bg-white text-black hover:bg-neutral-200 font-bold px-4 py-1.5 text-xs rounded-full shadow-sm transition-all cursor-pointer"
             >
-              Create Space
-            </Button>
+              <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Create Space</span>
+            </button>
 
             {/* Mobile hamburger menu button */}
             <button
