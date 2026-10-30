@@ -104,17 +104,17 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Anonymous Persona Pill (Matching Reference) */}
+            {/* Anonymous Persona Pill (Hidden on mobile, visible on tablet/desktop) */}
             <button
               type="button"
               onClick={() => setIsChangeIdentityOpen(true)}
               title="Click to change your anonymous persona"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-400/50 hover:bg-emerald-900/30 transition-all text-xs text-neutral-200"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-400/50 hover:bg-emerald-900/30 transition-all text-xs text-neutral-200"
             >
               <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-bold font-mono">
                 {identity.displayName.slice(0, 2).toUpperCase()}
               </span>
-              <span className="font-medium text-neutral-200 font-display hidden sm:inline max-w-[120px] truncate text-xs">
+              <span className="font-medium text-neutral-200 font-display hidden md:inline max-w-[120px] truncate text-xs">
                 {identity.displayName}
               </span>
               <RefreshCw className="w-3 h-3 text-emerald-400/70 hover:text-emerald-300 ml-0.5" />
@@ -136,13 +136,13 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 border border-white/10 transition-colors focus-visible:outline-2 focus-visible:outline-brand-500"
+              className="w-9 h-9 rounded-xl sm:rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 border border-white/10 transition-colors focus-visible:outline-2 focus-visible:outline-brand-500"
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
               {theme === 'dark' ? (
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <Sun className="w-4 h-4 text-amber-400" />
               ) : (
-                <Moon className="w-3.5 h-3.5 text-neutral-300" />
+                <Moon className="w-4 h-4 text-neutral-300" />
               )}
             </button>
 
@@ -156,14 +156,14 @@ export const Navbar: React.FC = () => {
               <span>Create Space</span>
             </button>
 
-            {/* Mobile hamburger menu button */}
+            {/* Mobile hamburger menu button (Matching Reference) */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 border border-neutral-200 dark:border-white/10"
+              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-neutral-300 hover:text-white hover:bg-white/10 border border-white/10 transition-colors"
               aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5 stroke-[1.8]" />}
             </button>
           </div>
         </div>
