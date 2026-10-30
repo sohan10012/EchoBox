@@ -8,7 +8,6 @@ import {
   Menu,
   X,
   Sparkles,
-  ShieldCheck,
   PlusCircle,
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
@@ -56,13 +55,6 @@ export const Navbar: React.FC = () => {
             className="px-3.5 py-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5 rounded-lg transition-colors"
           >
             How It Works
-          </a>
-          <a
-            href="/#security"
-            className="px-3.5 py-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5 rounded-lg transition-colors flex items-center gap-1.5"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-brand-500" />
-            Security & Anonymity
           </a>
           <Link
             to="/dashboard"
@@ -145,13 +137,6 @@ export const Navbar: React.FC = () => {
             className="block px-3 py-2 text-sm font-medium rounded-lg text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5"
           >
             How It Works
-          </a>
-          <a
-            href="/#security"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm font-medium rounded-lg text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5"
-          >
-            Security & Anonymity
           </a>
           <Link
             to="/dashboard"
