@@ -88,7 +88,7 @@ All screenshots below are captured directly from the live running application ac
 - **Notifications**: Sonner
 - **Design Tokens**: Google Labs `DESIGN.md` specification
 - **Cloud Infrastructure**:
-  - **API Gateway**: Amazon API Gateway HTTP API (`bnbpmiljw9`) with throttling & CORS
+  - **API Gateway**: Amazon API Gateway HTTP API with throttling & CORS
   - **Compute**: AWS Lambda (Python 3.14 runtime, 128MB memory, 3s timeout)
   - **Database**: Amazon DynamoDB (`EchoBox` single-table design with native TTL)
   - **Authentication**: Dual Amazon Cognito User Pools (Email-based & Pure Username-based)
@@ -135,8 +135,8 @@ EchoBox provides a privacy-first identity boundary by separating workspace owner
 
 | Metric | Workspace Pool (Room Owners) | Identity Pool (Manage My Posts) |
 | :--- | :--- | :--- |
-| **User Pool ID** | `ap-south-1_NfCww8cVp` | `ap-south-1_vRfOd670T` |
-| **App Client ID** | `sctqr0h0042caou4p0tk5s4b8` | `pg5flhrd2r35kp3bn1js2k2hg` |
+| **User Pool ID** | `ap-south-1_xxxxxxxxx` | `ap-south-1_yyyyyyyyy` |
+| **App Client ID** | `<your-workspace-client-id>` | `<your-identity-client-id>` |
 | **Sign-In Method** | Email + Password | Pure Username (`echo_...`) |
 | **Email Required?** | Yes | **NO (100% Privacy)** |
 | **PreSignUp Trigger** | `echobox-cognito-pre-signup` | `echobox-cognito-pre-signup` (auto-confirms) |
@@ -256,12 +256,12 @@ When deploying the frontend to Vercel, configure the following environment varia
 
 | Environment Variable | Recommended Value | Description |
 | :--- | :--- | :--- |
-| `VITE_API_BASE_URL` | `https://bnbpmiljw9.execute-api.ap-south-1.amazonaws.com` | API Gateway Base URL |
-| `VITE_AWS_REGION` | `ap-south-1` | AWS Region (Mumbai) |
-| `VITE_COGNITO_USER_POOL_ID` | `ap-south-1_NfCww8cVp` | Workspace User Pool (Owners) |
-| `VITE_COGNITO_CLIENT_ID` | `sctqr0h0042caou4p0tk5s4b8` | Workspace Client ID |
-| `VITE_COGNITO_IDENTITY_USER_POOL_ID` | `ap-south-1_vRfOd670T` | EchoBox Identity Pool (Pure Username) |
-| `VITE_COGNITO_IDENTITY_CLIENT_ID` | `pg5flhrd2r35kp3bn1js2k2hg` | EchoBox Identity Client ID |
+| `VITE_API_BASE_URL` | `https://<api-id>.execute-api.<region>.amazonaws.com` | API Gateway Base URL |
+| `VITE_AWS_REGION` | `ap-south-1` | AWS Region (e.g. Mumbai) |
+| `VITE_COGNITO_USER_POOL_ID` | `ap-south-1_xxxxxxxxx` | Workspace User Pool (Owners) |
+| `VITE_COGNITO_CLIENT_ID` | `<your-workspace-client-id>` | Workspace Client ID |
+| `VITE_COGNITO_IDENTITY_USER_POOL_ID` | `ap-south-1_yyyyyyyyy` | EchoBox Identity Pool (Pure Username) |
+| `VITE_COGNITO_IDENTITY_CLIENT_ID` | `<your-identity-client-id>` | EchoBox Identity Client ID |
 
 *Note: Single-page application (SPA) client-side routing is handled automatically via `vercel.json` rewrites.*
 
