@@ -126,33 +126,33 @@ export const HeroSection: React.FC = () => {
         
         {/* ========================================================= */}
         {/* BALANCED THREE-REGION DESKTOP COMPOSITION (Lg & Xl)       */}
-        {/* Region 1: Left Cards | Region 2: Center | Region 3: Right */}
+        {/* Region 1: Left 3D Cards | Region 2: Center | Region 3: Right 3D Cards */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[310px_1fr_310px] 2xl:grid-cols-[340px_1fr_340px] gap-6 xl:gap-8 items-center pt-2 sm:pt-6 pb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[310px_1fr_310px] 2xl:grid-cols-[340px_1fr_340px] gap-6 xl:gap-8 items-center pt-2 sm:pt-6 pb-6 perspective-1200">
           
           {/* ------------------------------------------------------- */}
-          {/* REGION 1: LEFT FLOATING CONVERSATION CARDS (Desktop)    */}
+          {/* REGION 1: LEFT FLOATING 3D CONVERSATION CARDS (Desktop) */}
           {/* ------------------------------------------------------- */}
-          <div className="hidden lg:flex flex-col justify-center gap-6 relative select-none">
-            {/* Desktop Card 1: Curious Lynx */}
-            <div className="animate-float-1 hover-pause">
-              <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 shadow-2xl space-y-3 transition-all duration-300 hover:scale-[1.02] hover:border-[#00D99A]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(0,217,154,0.15)] cursor-default">
+          <div className="hidden lg:flex flex-col justify-center gap-7 relative select-none perspective-1200">
+            {/* Desktop Card 1: Curious Lynx (3D Tilted & Floating) */}
+            <div className="animate-float-3d-l1 hover-pause">
+              <div className="rounded-2xl card-3d-glass p-4 space-y-3 cursor-default hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    <div className="w-7 h-7 rounded-full bg-[#5865F2] flex items-center justify-center text-white text-xs font-bold shadow-md">
                       🐱
                     </div>
                     <div>
                       <span className="font-bold text-xs text-white font-display block leading-none">
                         Curious Lynx
                       </span>
-                      <span className="text-[9px] text-neutral-500 font-mono">Sample opinion</span>
+                      <span className="text-[9px] text-neutral-400 font-mono">Sample opinion</span>
                     </div>
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">5m ago</span>
                 </div>
 
-                <p className="text-xs text-neutral-300 leading-relaxed font-normal">
+                <p className="text-xs text-neutral-200 leading-relaxed font-normal">
                   AI is making me 10x faster at building ideas. It feels like having a senior dev always on call.
                 </p>
 
@@ -171,25 +171,25 @@ export const HeroSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Desktop Card 2: Silent Panda */}
-            <div className="animate-float-2 hover-pause pl-2 xl:pl-4">
-              <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 shadow-2xl space-y-3 transition-all duration-300 hover:scale-[1.02] hover:border-[#00D99A]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(0,217,154,0.15)] cursor-default">
+            {/* Desktop Card 2: Silent Panda (3D Tilted & Floating) */}
+            <div className="animate-float-3d-l2 hover-pause pl-2 xl:pl-4">
+              <div className="rounded-2xl card-3d-glass p-4 space-y-3 cursor-default hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#0ea5e9] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    <div className="w-7 h-7 rounded-full bg-[#0ea5e9] flex items-center justify-center text-white text-xs font-bold shadow-md">
                       🐼
                     </div>
                     <div>
                       <span className="font-bold text-xs text-white font-display block leading-none">
                         Silent Panda
                       </span>
-                      <span className="text-[9px] text-neutral-500 font-mono">Sample opinion</span>
+                      <span className="text-[9px] text-neutral-400 font-mono">Sample opinion</span>
                     </div>
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">12m ago</span>
                 </div>
 
-                <p className="text-xs text-neutral-300 leading-relaxed font-normal">
+                <p className="text-xs text-neutral-200 leading-relaxed font-normal">
                   I think we're becoming too dependent. It's easy to lose the ability to solve problems deeply.
                 </p>
 
@@ -413,28 +413,28 @@ export const HeroSection: React.FC = () => {
           </div>
 
           {/* ------------------------------------------------------- */}
-          {/* REGION 3: RIGHT FLOATING CONVERSATION CARDS (Desktop)   */}
+          {/* REGION 3: RIGHT FLOATING 3D CONVERSATION CARDS (Desktop)*/}
           {/* ------------------------------------------------------- */}
-          <div className="hidden lg:flex flex-col justify-center gap-6 relative select-none">
-            {/* Desktop Card 3: Cosmic Owl with independent float */}
-            <div className="animate-float-3 hover-pause">
-              <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 shadow-2xl space-y-3 transition-all duration-300 hover:scale-[1.02] hover:border-[#00D99A]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(0,217,154,0.15)] cursor-default">
+          <div className="hidden lg:flex flex-col justify-center gap-7 relative select-none perspective-1200">
+            {/* Desktop Card 3: Cosmic Owl (3D Tilted & Floating) */}
+            <div className="animate-float-3d-r1 hover-pause">
+              <div className="rounded-2xl card-3d-glass p-4 space-y-3 cursor-default hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#f59e0b] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    <div className="w-7 h-7 rounded-full bg-[#f59e0b] flex items-center justify-center text-white text-xs font-bold shadow-md">
                       🦉
                     </div>
                     <div>
                       <span className="font-bold text-xs text-white font-display block leading-none">
                         Cosmic Owl
                       </span>
-                      <span className="text-[9px] text-neutral-500 font-mono">Sample opinion</span>
+                      <span className="text-[9px] text-neutral-400 font-mono">Sample opinion</span>
                     </div>
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">20m ago</span>
                 </div>
 
-                <p className="text-xs text-neutral-300 leading-relaxed font-normal">
+                <p className="text-xs text-neutral-200 leading-relaxed font-normal">
                   The best startup ideas usually solve a real problem + have the right timing and distribution.
                 </p>
 
@@ -453,25 +453,25 @@ export const HeroSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Desktop Card 4: Midnight Wolf with independent float */}
-            <div className="animate-float-1 hover-pause pr-2 xl:pr-4">
-              <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 shadow-2xl space-y-3 transition-all duration-300 hover:scale-[1.02] hover:border-[#00D99A]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(0,217,154,0.15)] cursor-default">
+            {/* Desktop Card 4: Midnight Wolf (3D Tilted & Floating) */}
+            <div className="animate-float-3d-r2 hover-pause pr-2 xl:pr-4">
+              <div className="rounded-2xl card-3d-glass p-4 space-y-3 cursor-default hover:scale-[1.02]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    <div className="w-7 h-7 rounded-full bg-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shadow-md">
                       🐺
                     </div>
                     <div>
                       <span className="font-bold text-xs text-white font-display block leading-none">
                         Midnight Wolf
                       </span>
-                      <span className="text-[9px] text-neutral-500 font-mono">Sample opinion</span>
+                      <span className="text-[9px] text-neutral-400 font-mono">Sample opinion</span>
                     </div>
                   </div>
                   <span className="text-[11px] text-neutral-400 font-mono">35m ago</span>
                 </div>
 
-                <p className="text-xs text-neutral-300 leading-relaxed font-normal">
+                <p className="text-xs text-neutral-200 leading-relaxed font-normal">
                   Anonymity is what allows the hardest truths to surface without fear of social or professional penalty.
                 </p>
 
