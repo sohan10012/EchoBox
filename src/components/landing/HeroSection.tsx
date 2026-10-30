@@ -67,14 +67,16 @@ export const HeroSection: React.FC = () => {
     card1: 24,
     card2: 17,
     card3: 31,
+    card4: 19,
   });
   const [liked, setLiked] = useState({
     card1: false,
     card2: false,
     card3: false,
+    card4: false,
   });
 
-  const toggleLike = (key: 'card1' | 'card2' | 'card3') => {
+  const toggleLike = (key: 'card1' | 'card2' | 'card3' | 'card4') => {
     setLiked((prev) => {
       const isNowLiked = !prev[key];
       setLikes((l) => ({
@@ -411,35 +413,11 @@ export const HeroSection: React.FC = () => {
           </div>
 
           {/* ------------------------------------------------------- */}
-          {/* REGION 3: RIGHT VISUAL ELEMENTS (Desktop)               */}
+          {/* REGION 3: RIGHT FLOATING CONVERSATION CARDS (Desktop)   */}
           {/* ------------------------------------------------------- */}
-          <div className="hidden lg:flex flex-col items-center justify-center gap-6 relative select-none">
-            {/* Desktop 3D Glass Speech Bubble Sculpture with organic float */}
-            <div className="animate-float-sculpture pointer-events-none relative w-44 xl:w-52 h-44 xl:h-52 flex items-center justify-center">
-              <div className="absolute inset-0 bg-[#00D99A]/15 blur-3xl rounded-full" />
-              <img
-                src="/glass_bubble_transparent.png"
-                alt="3D Glass Bubble Sculpture"
-                className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_35px_rgba(0,217,154,0.35)]"
-              />
-            </div>
-
-            {/* Floating Badge: Real people / Real opinions / No profiles */}
-            <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl px-3 py-2 shadow-xl pointer-events-none">
-              <div className="flex items-end gap-0.5 h-3.5 text-[#00D99A]">
-                <span className="w-1 h-2 bg-[#00D99A] rounded-xs" />
-                <span className="w-1 h-3.5 bg-[#00D99A] rounded-xs" />
-                <span className="w-1 h-2.5 bg-[#00D99A] rounded-xs" />
-              </div>
-              <div className="text-[10px] leading-tight font-sans">
-                <div className="font-semibold text-white">Real people</div>
-                <div className="text-neutral-300">Real opinions</div>
-                <div className="text-neutral-500 text-[9px]">No profiles</div>
-              </div>
-            </div>
-
+          <div className="hidden lg:flex flex-col justify-center gap-6 relative select-none">
             {/* Desktop Card 3: Cosmic Owl with independent float */}
-            <div className="animate-float-3 hover-pause w-full">
+            <div className="animate-float-3 hover-pause">
               <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 shadow-2xl space-y-3 transition-all duration-300 hover:scale-[1.02] hover:border-[#00D99A]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(0,217,154,0.15)] cursor-default">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -470,6 +448,43 @@ export const HeroSection: React.FC = () => {
                   >
                     <Heart className={`w-3.5 h-3.5 ${liked.card3 ? 'fill-current text-rose-500' : 'text-rose-500/80 fill-rose-500/80'}`} />
                     <span className="text-white text-xs font-bold">{likes.card3}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Card 4: Midnight Wolf with independent float */}
+            <div className="animate-float-1 hover-pause pr-2 xl:pr-4">
+              <div className="rounded-2xl border border-white/10 bg-[#121614]/85 backdrop-blur-xl p-4 shadow-2xl space-y-3 transition-all duration-300 hover:scale-[1.02] hover:border-[#00D99A]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.6),0_0_20px_rgba(0,217,154,0.15)] cursor-default">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-[#8b5cf6] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                      🐺
+                    </div>
+                    <div>
+                      <span className="font-bold text-xs text-white font-display block leading-none">
+                        Midnight Wolf
+                      </span>
+                      <span className="text-[9px] text-neutral-500 font-mono">Sample opinion</span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-neutral-400 font-mono">35m ago</span>
+                </div>
+
+                <p className="text-xs text-neutral-300 leading-relaxed font-normal">
+                  Anonymity is what allows the hardest truths to surface without fear of social or professional penalty.
+                </p>
+
+                <div className="flex items-center justify-end pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleLike('card4')}
+                    className={`flex items-center gap-1.5 text-xs font-mono transition-colors ${
+                      liked.card4 ? 'text-rose-500' : 'text-neutral-400 hover:text-rose-400'
+                    }`}
+                  >
+                    <Heart className={`w-3.5 h-3.5 ${liked.card4 ? 'fill-current text-rose-500' : 'text-rose-500/80 fill-rose-500/80'}`} />
+                    <span className="text-white text-xs font-bold">{likes.card4}</span>
                   </button>
                 </div>
               </div>
