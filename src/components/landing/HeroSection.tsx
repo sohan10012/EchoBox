@@ -166,27 +166,6 @@ export const HeroSection: React.FC = () => {
             </Button>
           </Link>
         </motion.div>
-
-        {/* Clean trust indicators */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          className="pt-6 border-t border-neutral-200/60 dark:border-white/5 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-neutral-500 dark:text-neutral-400"
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Zero Mandatory Registration</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Automatic 24-Hour Expiry</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Pure Browser Persona</span>
-          </div>
-        </motion.div>
       </div>
 
       <CreateRoomModal

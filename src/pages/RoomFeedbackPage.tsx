@@ -24,7 +24,7 @@ import { Badge } from '@/components/common/Badge';
 import { Avatar } from '@/components/common/Avatar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FeedbackCardSkeleton } from '@/components/common/Skeleton';
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { useRoomShare } from '@/hooks/useRoomShare';
 import { useCountdown } from '@/hooks/useCountdown';
 import { formatRelativeTime, formatFullDate } from '@/utils/date';
 import { getMessageIdentity } from '@/utils/avatar';
@@ -51,8 +51,18 @@ export const RoomFeedbackPage: React.FC = () => {
   const [isClosingRoom, setIsClosingRoom] = useState(false);
   const [isReopeningRoom, setIsReopeningRoom] = useState(false);
 
-  const { copy, isCopied } = useCopyToClipboard();
-  const publicUrl = roomId ? `${window.location.origin}/room/${roomId}` : '';
+  const {
+    publicUrl,
+    isIdCopied,
+    isLinkCopied,
+    copyRoomId,
+    copyRoomLink,
+    shareRoom,
+  } = useRoomShare({
+    roomId: roomId || '',
+    roomName: room?.room_name,
+    roomDescription: room?.room_description,
+  });
 
   const countdown = useCountdown(room?.expires_at);
   const isRoomExpired = Boolean(room?.is_expired || countdown.isExpired);
@@ -212,12 +222,23 @@ export const RoomFeedbackPage: React.FC = () => {
           </Button>
 
           <Button
+            type="button"
             variant="secondary"
             size="sm"
-            onClick={() => copy(publicUrl, 'Public room link copied!')}
-            leftIcon={isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+            onClick={shareRoom}
+            leftIcon={<Share2 className="w-3.5 h-3.5 text-emerald-500" />}
           >
-            {isCopied ? 'Link Copied' : 'Copy Link'}
+            Share Room
+          </Button>
+
+          <Button
+            type="button"
+            variant={isIdCopied ? 'secondary' : 'outline'}
+            size="sm"
+            onClick={copyRoomId}
+            leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+          >
+            {isIdCopied ? 'ID Copied' : 'Copy ID'}
           </Button>
 
           <a href={publicUrl} target="_blank" rel="noreferrer">
@@ -257,9 +278,15 @@ export const RoomFeedbackPage: React.FC = () => {
               </p>
             )}
             <div className="flex items-center gap-3 text-xs text-neutral-400 dark:text-neutral-500 flex-wrap">
-              <span className="font-mono bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded">
-                Room ID: {roomId}
-              </span>
+              <button
+                type="button"
+                onClick={copyRoomId}
+                className="inline-flex items-center gap-1 font-mono text-xs bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 px-2 py-0.5 rounded text-neutral-800 dark:text-neutral-200 transition-colors"
+                title="Click to copy Room ID"
+              >
+                <span>ID: {roomId}</span>
+                {isIdCopied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3 opacity-60" />}
+              </button>
               {room?.created_at && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" />
@@ -316,14 +343,36 @@ export const RoomFeedbackPage: React.FC = () => {
         </div>
 
         {/* Public Link Reminder */}
-        <div className="pt-3 border-t border-neutral-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div className="pt-3 border-t border-neutral-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
             <Share2 className="w-3.5 h-3.5 text-brand-500 flex-shrink-0" />
             <span>Public chat URL for participants:</span>
           </div>
-          <span className="font-mono text-neutral-600 dark:text-neutral-300 truncate max-w-md bg-neutral-100 dark:bg-white/5 px-2 py-1 rounded">
-            {publicUrl}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-neutral-600 dark:text-neutral-300 truncate max-w-xs sm:max-w-md bg-neutral-100 dark:bg-white/5 px-2.5 py-1.5 rounded-lg border border-neutral-200/60 dark:border-white/5 text-[11px] select-all">
+              {publicUrl}
+            </span>
+            <Button
+              type="button"
+              variant={isLinkCopied ? 'secondary' : 'outline'}
+              size="sm"
+              className="h-8 px-2.5 text-xs flex-shrink-0"
+              onClick={copyRoomLink}
+              leftIcon={isLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+            >
+              {isLinkCopied ? 'Copied' : 'Copy Link'}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-8 px-2.5 text-xs flex-shrink-0"
+              onClick={shareRoom}
+              leftIcon={<Share2 className="w-3.5 h-3.5 text-emerald-500" />}
+            >
+              Share
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -427,12 +476,12 @@ export const RoomFeedbackPage: React.FC = () => {
           </p>
           <div className="pt-2">
             <Button
-              variant="secondary"
+              variant={isLinkCopied ? 'secondary' : 'primary'}
               size="sm"
-              onClick={() => copy(publicUrl, 'Public link copied!')}
-              leftIcon={<Copy className="w-3.5 h-3.5" />}
+              onClick={copyRoomLink}
+              leftIcon={isLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
             >
-              Copy Shareable Link
+              {isLinkCopied ? 'Link Copied' : 'Copy Shareable Link'}
             </Button>
           </div>
         </div>

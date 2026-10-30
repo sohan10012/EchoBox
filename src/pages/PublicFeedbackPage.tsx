@@ -11,12 +11,13 @@ import {
   Info,
   MessageSquare,
   KeyRound,
+  Share2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { echoService } from '@/api/echoService';
 import { FeedbackItem, RoomMetadata } from '@/api/types';
 import { useAnonymousIdentity } from '@/hooks/useAnonymousIdentity';
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { useRoomShare } from '@/hooks/useRoomShare';
 import { useCountdown } from '@/hooks/useCountdown';
 import { useAuth } from '@/context/AuthContext';
 import { formatRelativeTime, formatFullDate } from '@/utils/date';
@@ -72,8 +73,18 @@ export const PublicFeedbackPage: React.FC = () => {
   // Polling guard
   const isPollingBusyRef = useRef(false);
 
-  const { copy, isCopied } = useCopyToClipboard();
-  const publicUrl = window.location.href;
+  const {
+    publicUrl,
+    isIdCopied,
+    isLinkCopied,
+    copyRoomId,
+    copyRoomLink,
+    shareRoom,
+  } = useRoomShare({
+    roomId: roomId || '',
+    roomName: room?.room_name,
+    roomDescription: room?.room_description,
+  });
 
   // Countdown timer based on room.expires_at
   const countdown = useCountdown(room?.expires_at);
@@ -341,9 +352,19 @@ export const PublicFeedbackPage: React.FC = () => {
             <div className="pt-2 border-t border-neutral-100 dark:border-white/5 space-y-2.5 text-xs">
               <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
                 <span>Room Identifier</span>
-                <span className="font-mono bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded text-neutral-800 dark:text-neutral-200">
-                  {roomId}
-                </span>
+                <button
+                  type="button"
+                  onClick={copyRoomId}
+                  title="Click to copy Room ID"
+                  className="inline-flex items-center gap-1 font-mono bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 px-2 py-0.5 rounded text-neutral-800 dark:text-neutral-200 transition-colors cursor-pointer group"
+                >
+                  <span>#{roomId}</span>
+                  {isIdCopied ? (
+                    <Check className="w-3 h-3 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </button>
               </div>
               {room?.created_at && (
                 <div className="flex items-center justify-between text-neutral-500 dark:text-neutral-400">
@@ -391,10 +412,14 @@ export const PublicFeedbackPage: React.FC = () => {
 
           {/* Invite & Share Card */}
           <div className="rounded-2xl border border-neutral-200/90 dark:border-white/10 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md p-4 space-y-3 shadow-sm">
-            <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 block">
-              Invite Participants
-            </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                Invite & Share
+              </span>
+              <span className="text-[10px] text-emerald-500 font-mono">Public Space</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
               <input
                 type="text"
                 readOnly
@@ -403,16 +428,41 @@ export const PublicFeedbackPage: React.FC = () => {
               />
               <Button
                 type="button"
-                variant={isCopied ? 'secondary' : 'primary'}
+                variant={isLinkCopied ? 'secondary' : 'primary'}
                 size="sm"
                 className="h-8 px-2.5 flex-shrink-0"
-                onClick={() => copy(publicUrl, 'Invite link copied!')}
+                onClick={copyRoomLink}
+                title="Copy Room Link"
               >
-                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                {isLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               </Button>
             </div>
+
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="w-full text-xs h-8"
+                onClick={shareRoom}
+                leftIcon={<Share2 className="w-3.5 h-3.5 text-emerald-500" />}
+              >
+                Share Room
+              </Button>
+              <Button
+                type="button"
+                variant={isIdCopied ? 'secondary' : 'outline'}
+                size="sm"
+                className="w-full text-xs h-8"
+                onClick={copyRoomId}
+                leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              >
+                {isIdCopied ? 'ID Copied' : 'Copy ID'}
+              </Button>
+            </div>
+
             <p className="text-[10px] text-neutral-400 leading-tight">
-              Anyone with this URL can post anonymously without signing in.
+              Anyone with the link or room ID can join and converse anonymously.
             </p>
           </div>
         </aside>
@@ -437,6 +487,14 @@ export const PublicFeedbackPage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1.5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={shareRoom}
+                className="p-1.5 rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
+                title="Share room"
+              >
+                <Share2 className="w-4 h-4 text-emerald-500" />
+              </button>
               <button
                 type="button"
                 onClick={() => setIsMobileInfoOpen(true)}
@@ -732,11 +790,33 @@ export const PublicFeedbackPage: React.FC = () => {
               />
               <Button
                 type="button"
-                variant={isCopied ? 'secondary' : 'primary'}
+                variant={isLinkCopied ? 'secondary' : 'primary'}
                 size="sm"
-                onClick={() => copy(publicUrl, 'Invite link copied!')}
+                onClick={copyRoomLink}
               >
-                {isCopied ? 'Copied' : 'Copy'}
+                {isLinkCopied ? 'Copied' : 'Copy'}
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="w-full text-xs"
+                onClick={shareRoom}
+                leftIcon={<Share2 className="w-3.5 h-3.5 text-emerald-500" />}
+              >
+                Share
+              </Button>
+              <Button
+                type="button"
+                variant={isIdCopied ? 'secondary' : 'outline'}
+                size="sm"
+                className="w-full text-xs"
+                onClick={copyRoomId}
+                leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              >
+                {isIdCopied ? 'ID Copied' : 'Copy ID'}
               </Button>
             </div>
           </div>

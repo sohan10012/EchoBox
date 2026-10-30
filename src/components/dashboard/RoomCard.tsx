@@ -6,17 +6,17 @@ import {
   MessageSquare,
   Calendar,
   Lock,
-  ExternalLink,
   ChevronRight,
   Sparkles,
   Clock,
+  Share2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { echoService } from '@/api/echoService';
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { useRoomShare } from '@/hooks/useRoomShare';
 import { useCountdown } from '@/hooks/useCountdown';
 import { formatRelativeTime } from '@/utils/date';
 import { RoomStatus } from '@/api/types';
@@ -52,9 +52,15 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  const { copy, isCopied } = useCopyToClipboard();
+  const {
+    isIdCopied,
+    copyRoomId,
+    shareRoom,
+  } = useRoomShare({
+    roomId,
+    roomName,
+  });
   const countdown = useCountdown(expiresAt);
-  const publicUrl = `${window.location.origin}/room/${roomId}`;
 
   // Fetch real-time status and metadata from AWS backend if not pre-supplied
   useEffect(() => {
@@ -140,9 +146,23 @@ export const RoomCard: React.FC<RoomCardProps> = ({
                 {roomName}
               </h3>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] text-neutral-400 dark:text-neutral-500 bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded">
-                  ID: {roomId}
-                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copyRoomId();
+                  }}
+                  className="inline-flex items-center gap-1 font-mono text-[11px] text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 px-2 py-0.5 rounded transition-colors"
+                  title="Click to copy Room ID"
+                >
+                  <span>#{roomId}</span>
+                  {isIdCopied ? (
+                    <Check className="w-3 h-3 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-3 h-3 opacity-60" />
+                  )}
+                </button>
                 <span className="text-[11px] text-neutral-400 dark:text-neutral-500 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {formatRelativeTime(createdAt)}
@@ -217,37 +237,48 @@ export const RoomCard: React.FC<RoomCardProps> = ({
         </div>
 
         {/* Card Actions Bottom */}
-        <div className="pt-5 flex items-center justify-between gap-2">
-          {/* Copy link button */}
-          <div className="flex items-center gap-1.5">
-            <button
+        <div className="pt-4 flex items-center justify-between gap-2 border-t border-neutral-100 dark:border-white/5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Share Room Button */}
+            <Button
               type="button"
-              onClick={() => copy(publicUrl, 'Public feedback link copied!')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 border border-neutral-200/80 dark:border-white/10 transition-colors"
-              title="Copy shareable link"
+              variant="outline"
+              size="sm"
+              className="h-8 px-2.5 text-xs text-neutral-700 dark:text-neutral-300"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                shareRoom();
+              }}
+              leftIcon={<Share2 className="w-3.5 h-3.5 text-emerald-500" />}
             >
-              {isCopied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-              ) : (
-                <Copy className="w-3.5 h-3.5" />
-              )}
-              <span>{isCopied ? 'Copied' : 'Link'}</span>
-            </button>
+              Share Room
+            </Button>
 
-            <a
-              href={publicUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-              title="Open public chat in new tab"
+            {/* Copy Room ID Button */}
+            <Button
+              type="button"
+              variant={isIdCopied ? 'secondary' : 'outline'}
+              size="sm"
+              className="h-8 px-2.5 text-xs text-neutral-700 dark:text-neutral-300"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                copyRoomId();
+              }}
+              leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
             >
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+              {isIdCopied ? 'ID Copied' : 'Copy ID'}
+            </Button>
 
             {status === 'active' && !isRoomExpired && (
               <button
                 type="button"
-                onClick={() => setIsCloseModalOpen(true)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsCloseModalOpen(true);
+                }}
                 className="p-1.5 rounded-lg text-neutral-400 hover:text-amber-500 hover:bg-amber-500/10 dark:hover:bg-amber-500/10 transition-colors"
                 title="Close room to stop further feedback"
               >
@@ -263,7 +294,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
               size="sm"
               rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
             >
-              View Room
+              Manage
             </Button>
           </Link>
         </div>

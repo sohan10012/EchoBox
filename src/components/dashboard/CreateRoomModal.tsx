@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Copy, Check, ExternalLink, ArrowRight, Globe, Lock, Clock } from 'lucide-react';
+import { Sparkles, Copy, Check, ArrowRight, Globe, Lock, Clock, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Modal } from '@/components/common/Modal';
 import { Button } from '@/components/common/Button';
 import { echoService } from '@/api/echoService';
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { useRoomShare } from '@/hooks/useRoomShare';
 import { RoomVisibility } from '@/api/types';
 
 interface CreateRoomModalProps {
@@ -30,8 +30,20 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
     visibility: RoomVisibility;
   } | null>(null);
 
-  const { copy, isCopied } = useCopyToClipboard();
   const navigate = useNavigate();
+
+  const {
+    publicUrl,
+    isIdCopied,
+    isLinkCopied,
+    copyRoomId,
+    copyRoomLink,
+    shareRoom,
+  } = useRoomShare({
+    roomId: createdRoom?.roomId || '',
+    roomName: createdRoom?.roomName,
+    roomDescription: createdRoom?.roomDescription,
+  });
 
   const handleReset = () => {
     setRoomName('');
@@ -85,10 +97,6 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
       setIsLoading(false);
     }
   };
-
-  const publicUrl = createdRoom
-    ? `${window.location.origin}/room/${createdRoom.roomId}`
-    : '';
 
   return (
     <Modal
@@ -218,53 +226,97 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
           </div>
         </form>
       ) : (
-        <div className="space-y-5 pt-2">
-          {/* Shareable Link Box */}
-          <div className="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/90 border border-neutral-200 dark:border-white/10 space-y-2">
-            <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-              <span className="font-medium">Direct Discussion Link</span>
-              <span className="font-mono text-[11px] text-brand-500">
-                ID: {createdRoom.roomId}
-              </span>
+        <div className="space-y-4 pt-1">
+          {/* Success Banner */}
+          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 text-emerald-500 mt-0.5">
+              <Check className="w-5 h-5 text-emerald-500 dark:text-emerald-400 stroke-[2.5]" />
             </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                readOnly
-                value={publicUrl}
-                className="w-full text-xs font-mono text-neutral-800 dark:text-neutral-200 bg-white dark:bg-black/40 border border-neutral-200 dark:border-white/10 px-3 py-2 rounded-lg select-all"
-              />
-              <Button
-                type="button"
-                variant={isCopied ? 'secondary' : 'primary'}
-                size="sm"
-                className="flex-shrink-0"
-                onClick={() => copy(publicUrl, 'Discussion link copied!')}
-                leftIcon={isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-              >
-                {isCopied ? 'Copied' : 'Copy'}
-              </Button>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-neutral-900 dark:text-white font-display">
+                  Discussion Space Ready!
+                </span>
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">
+                  {createdRoom.visibility}
+                </span>
+              </div>
+              <p className="text-xs text-neutral-700 dark:text-neutral-300 font-semibold truncate mt-0.5">
+                {createdRoom.roomName}
+              </p>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 line-clamp-2 mt-1 italic leading-relaxed">
+                "{createdRoom.roomDescription}"
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-neutral-100 dark:border-white/5">
+          {/* Room ID & Link Card */}
+          <div className="p-4 rounded-xl bg-neutral-100/90 dark:bg-neutral-900/90 border border-neutral-200 dark:border-white/10 space-y-3.5">
+            {/* Room ID Row */}
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-neutral-200/70 dark:border-white/5">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 font-semibold block">
+                  Room Identifier
+                </span>
+                <span className="font-mono text-base font-bold text-neutral-900 dark:text-white tracking-wider">
+                  #{createdRoom.roomId}
+                </span>
+              </div>
+
+              <Button
+                type="button"
+                variant={isIdCopied ? 'secondary' : 'outline'}
+                size="sm"
+                className="h-9 px-3 text-xs"
+                onClick={copyRoomId}
+                leftIcon={isIdCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              >
+                {isIdCopied ? 'ID Copied' : 'Copy Room ID'}
+              </Button>
+            </div>
+
+            {/* Room Link Row */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 font-semibold block">
+                Shareable Public URL
+              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={publicUrl}
+                  className="w-full text-xs font-mono text-neutral-800 dark:text-neutral-200 bg-white dark:bg-black/40 border border-neutral-200 dark:border-white/10 px-3 py-2 rounded-lg select-all"
+                />
+                <Button
+                  type="button"
+                  variant={isLinkCopied ? 'secondary' : 'outline'}
+                  size="sm"
+                  className="h-9 px-3 text-xs flex-shrink-0"
+                  onClick={copyRoomLink}
+                  leftIcon={isLinkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                >
+                  {isLinkCopied ? 'Copied' : 'Copy Link'}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons: Share Room + Enter Discussion */}
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2 border-t border-neutral-100 dark:border-white/5">
             <Button
               type="button"
               variant="secondary"
-              className="w-full sm:flex-1"
-              onClick={() => {
-                window.open(publicUrl, '_blank');
-              }}
-              leftIcon={<ExternalLink className="w-4 h-4" />}
+              className="w-full sm:flex-1 h-11"
+              onClick={shareRoom}
+              leftIcon={<Share2 className="w-4 h-4 text-emerald-500" />}
             >
-              Open in New Tab
+              Share Room
             </Button>
 
             <Button
               type="button"
               variant="primary"
-              className="w-full sm:flex-1"
+              className="w-full sm:flex-1 h-11 font-semibold"
               onClick={() => {
                 const targetId = createdRoom.roomId;
                 handleReset();
@@ -272,7 +324,7 @@ export const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               }}
               rightIcon={<ArrowRight className="w-4 h-4 ml-0.5" />}
             >
-              Enter Discussion
+              Enter Discussion Space
             </Button>
           </div>
         </div>

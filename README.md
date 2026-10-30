@@ -9,7 +9,12 @@ EchoBox is an anonymous-first group conversation platform engineered with React,
 ## 1. Product Experience & Features
 
 - **Zero-Friction Anonymous Participation**: Anyone can join any accessible room or browse public discussions immediately without signing up, providing an email, or setting a password.
-- **Topic & Discussion Question Anchoring**: Every room is created with a clear discussion prompt (e.g. *"GTA 6 Discussion"*, *"AI Coding & Agentic Tools in 2026"*). A pinned topic banner remains visible on desktop and mobile without taking up excessive vertical height.
+- **Effortless Room Sharing & 1-Click ID Copying**: Instant room sharing via native Web Share API (`navigator.share`) on mobile devices and smooth clipboard copy fallback on desktop, plus 1-click `#roomId` copy buttons with immediate feedback toasts across creation modals, room cards, dashboard, and public spaces.
+- **Topic & Discussion Question Anchoring**: Every room is created with a clear discussion prompt (e.g. *"Is AI making developers more productive or dependent?"*, *"What makes a startup idea worth building?"*). A pinned topic banner remains visible on desktop and mobile without taking up excessive vertical height.
+- **Realistic Active Sample Discussions**: Seeded with live, high-quality, authentic multi-turn conversations reflecting contrasting viewpoints, realistic nuances, and natural time distribution across active topics:
+  - `88e686fc`: *Is AI making developers more productive or dependent?* (18 messages)
+  - `e2b53ca7`: *What makes a startup idea worth building?* (18 messages)
+  - `c72f033e`: *Is college still necessary for a successful tech career?* (18 messages)
 - **Session-Scoped Pseudonymous Identity**: Each visitor is assigned a colorful gradient avatar and memorable pseudonym (e.g. *Curious Lynx*, *Silent Panda*, *Cosmic Owl*) stored in `sessionStorage`. Identities stay consistent across rooms during a browser session.
 - **Explicit Identity Regeneration**: Visitors can explicitly re-roll their persona via "Change Identity" with confirmation; previously posted messages preserve their original pseudonyms.
 - **Public Room Discovery**: Real-time discovery feed of active, unexpired public rooms with live submission counts, remaining lifetime countdowns, and debounced keyword search.
@@ -27,26 +32,30 @@ All screenshots below are captured directly from the live running application:
 ### 2.1 Desktop Landing Page & Hero
 ![EchoBox Desktop Landing Page](docs/screenshots/landing_page_desktop.png)
 
-### 2.2 Anonymous Chat Stream (Desktop 3-Column Layout)
-*Pinned discussion topic, real-time message stream, cooldown-protected composer, room details, and identity card.*
+### 2.2 Public Room Discovery & Live Sample Discussions
+*Active discovery feed showcasing the 3 seeded sample topics with real-time participation metrics and search filtering.*
+![EchoBox Public Discovery](docs/screenshots/public_discovery.png)
+
+### 2.3 Anonymous Chat Stream (Desktop 3-Column Layout)
+*Pinned discussion topic, real-time message stream, cooldown-protected composer, room details, and new 1-click sharing controls.*
 ![EchoBox Anonymous Chat Desktop](docs/screenshots/anonymous_chat_desktop.png)
 
-### 2.3 Ultrawide / Desktop Monitor View (1920×1080)
+### 2.4 Ultrawide / Desktop Monitor View (1920×1080)
 *Balanced horizontal layout with responsive column constraints.*
 ![EchoBox Ultrawide 1920px View](docs/screenshots/desktop_wide_chat.png)
 
-### 2.4 Tablet Chat Interface (820×1180)
+### 2.5 Tablet Chat Interface (820×1180)
 *Adaptive layout with responsive action bars.*
 ![EchoBox Tablet View](docs/screenshots/tablet_chat_interface.png)
 
-### 2.5 Mobile Landing Page & Mobile Chat Interface (390×844)
+### 2.6 Mobile Landing Page & Mobile Chat Interface (390×844)
 *Mobile-first single-column chat with touch-friendly composer, pinned topic banner, and slide-over information drawers.*
 
 | Mobile Landing Page | Mobile Anonymous Chat Interface |
 | :---: | :---: |
 | ![Mobile Landing Page](docs/screenshots/mobile_landing_page.png) | ![Mobile Chat Interface](docs/screenshots/mobile_chat_interface.png) |
 
-### 2.6 Manage My Posts & Owner Authentication
+### 2.7 Manage My Posts & Owner Authentication
 
 | Manage My Posts Dashboard | Owner Authentication |
 | :---: | :---: |
