@@ -69,15 +69,6 @@ export const Navbar: React.FC = () => {
               <span>Explore Topics</span>
             </Link>
 
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="px-3.5 py-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5 rounded-lg transition-colors flex items-center gap-1.5"
-            >
-              <PlusCircle className="w-4 h-4 text-brand-500" />
-              <span>Create Space</span>
-            </button>
-
             <Link
               to="/my-posts"
               className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
@@ -88,6 +79,17 @@ export const Navbar: React.FC = () => {
             >
               <FolderOpen className="w-4 h-4 text-brand-500" />
               <span>Manage My Posts</span>
+            </Link>
+
+            <Link
+              to="/dashboard"
+              className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                location.pathname === '/dashboard'
+                  ? 'text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5 font-semibold'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/50 dark:hover:bg-white/5'
+              }`}
+            >
+              <span>Owner Spaces</span>
             </Link>
           </nav>
 
@@ -137,7 +139,7 @@ export const Navbar: React.FC = () => {
               )}
             </button>
 
-            {/* Quick Action: Create Space button (Desktop) */}
+            {/* Single Primary Action: Create Space button (Desktop) */}
             <Button
               variant="primary"
               size="sm"
@@ -145,7 +147,7 @@ export const Navbar: React.FC = () => {
               className="hidden sm:inline-flex shadow-glow-sm"
               leftIcon={<PlusCircle className="w-3.5 h-3.5" />}
             >
-              New Space
+              Create Space
             </Button>
 
             {/* Mobile hamburger menu button */}

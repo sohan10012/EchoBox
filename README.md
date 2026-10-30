@@ -27,37 +27,52 @@ EchoBox is an anonymous-first group conversation platform engineered with React,
 
 ## 2. Genuine Application Screenshots
 
-All screenshots below are captured directly from the live running application:
+All screenshots below are captured directly from the live running application across different device form factors:
 
-### 2.1 Desktop Landing Page & Hero
-![EchoBox Desktop Landing Page](docs/screenshots/landing_page_desktop.png)
+### 2.1 Mobile Viewports (320px–430px)
+*Mobile-first single-column layout with compact navigation, full-width touch-friendly room ID entry, and direct access to live topics without horizontal scrolling.*
 
-### 2.2 Public Room Discovery & Live Sample Discussions
-*Active discovery feed showcasing the 3 seeded sample topics with real-time participation metrics and search filtering.*
-![EchoBox Public Discovery](docs/screenshots/public_discovery.png)
+| Mobile (320px Ultra-Compact) | Mobile (390px Standard) | Mobile (430px Max) |
+| :---: | :---: | :---: |
+| ![EchoBox Mobile 320px](docs/screenshots/mobile_landing_320.png) | ![EchoBox Mobile 390px](docs/screenshots/mobile_landing_390.png) | ![EchoBox Mobile 430px](docs/screenshots/mobile_landing_430.png) |
 
-### 2.3 Anonymous Chat Stream (Desktop 3-Column Layout)
-*Pinned discussion topic, real-time message stream, cooldown-protected composer, room details, and new 1-click sharing controls.*
-![EchoBox Anonymous Chat Desktop](docs/screenshots/anonymous_chat_desktop.png)
+| Mobile Anonymous Chat Interface |
+| :---: |
+| ![Mobile Chat Interface](docs/screenshots/mobile_chat_interface.png) |
 
-### 2.4 Ultrawide / Desktop Monitor View (1920×1080)
-*Balanced horizontal layout with responsive column constraints.*
-![EchoBox Ultrawide 1920px View](docs/screenshots/desktop_wide_chat.png)
+### 2.2 Tablet Viewports (768px–1024px)
+*Tailored responsive composition with balanced hero typography, interactive room entry, and live discussion spotlight.*
 
-### 2.5 Tablet Chat Interface (820×1180)
-*Adaptive layout with responsive action bars.*
-![EchoBox Tablet View](docs/screenshots/tablet_chat_interface.png)
+| Tablet (768px Portrait) | Tablet (820px iPad Air) | Tablet (1024px Landscape) |
+| :---: | :---: | :---: |
+| ![EchoBox Tablet 768px](docs/screenshots/tablet_landing_768.png) | ![EchoBox Tablet 820px](docs/screenshots/tablet_landing_820.png) | ![EchoBox Tablet 1024px](docs/screenshots/tablet_landing_1024.png) |
 
-### 2.6 Mobile Landing Page & Mobile Chat Interface (390×844)
-*Mobile-first single-column chat with touch-friendly composer, pinned topic banner, and slide-over information drawers.*
+### 2.3 Laptop Viewports (1280px–1440px)
+*Asymmetric 3-column editorial layout: Left dialogue deck with authentic peer perspectives, center conversion anchor with redesigned room ID input, right live topic spotlight.*
 
-| Mobile Landing Page | Mobile Anonymous Chat Interface |
+| Laptop (1280px Compact) | Laptop (1440px Desktop) |
 | :---: | :---: |
-| ![Mobile Landing Page](docs/screenshots/mobile_landing_page.png) | ![Mobile Chat Interface](docs/screenshots/mobile_chat_interface.png) |
+| ![EchoBox Laptop 1280px](docs/screenshots/laptop_landing_1280.png) | ![EchoBox Laptop 1440px](docs/screenshots/laptop_landing_1440.png) |
 
-### 2.7 Manage My Posts & Owner Authentication
+### 2.4 Large Desktop Viewports (1600px–1920px+)
+*Balanced ultrawide layout with restrained max-width constraints, ambient lighting depth, and full-resolution discussion cards.*
+
+| Desktop (1600px Widescreen) | Desktop (1920px Ultrawide) |
+| :---: | :---: |
+| ![EchoBox Desktop 1600px](docs/screenshots/desktop_landing_1600.png) | ![EchoBox Desktop 1920px](docs/screenshots/desktop_landing_1920.png) |
+
+### 2.5 Product Core & Discovery
+*Real-time discovery feed showcasing the 3 seeded sample topics with live participation metrics, search filtering, and 3-column anonymous chat room.*
+
+| Public Room Discovery | Anonymous Chat Stream |
+| :---: | :---: |
+| ![EchoBox Public Discovery](docs/screenshots/public_discovery.png) | ![EchoBox Anonymous Chat Desktop](docs/screenshots/anonymous_chat_desktop.png) |
+
+### 2.6 Manage My Posts & Owner Authentication
 
 | Manage My Posts Dashboard | Owner Authentication |
+| :---: | :---: |
+| ![Manage My Posts Dashboard](docs/screenshots/manage_my_posts.png) | ![Owner Authentication](docs/screenshots/owner_auth.png) |
 | :---: | :---: |
 | ![Manage My Posts Dashboard](docs/screenshots/manage_my_posts.png) | ![Owner Authentication](docs/screenshots/owner_auth.png) |
 
