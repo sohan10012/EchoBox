@@ -2,20 +2,23 @@ import json
 import boto3
 import uuid
 import base64
+import os
 from datetime import datetime, timezone
 from decimal import Decimal
 from boto3.dynamodb.conditions import Key
 
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("EchoBox")
-cognito_client = boto3.client("cognito-idp", region_name="ap-south-1")
+TABLE_NAME = os.environ.get("DYNAMODB_TABLE", "EchoBox")
+AWS_REGION = os.environ.get("AWS_REGION", "ap-south-1")
+USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID", "ap-south-1_NfCww8cVp")
+IDENTITY_POOL_ID = os.environ.get("COGNITO_IDENTITY_POOL_ID", "ap-south-1_vRfOd670T")
 
-USER_POOL_ID = "ap-south-1_NfCww8cVp"       # Owner User Pool (Email-based)
-IDENTITY_POOL_ID = "ap-south-1_vRfOd670T"   # EchoBox ID User Pool (Username-based, anonymous)
+dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+table = dynamodb.Table(TABLE_NAME)
+cognito_client = boto3.client("cognito-idp", region_name=AWS_REGION)
 
 VALID_ISSUERS = {
-    f"https://cognito-idp.ap-south-1.amazonaws.com/{USER_POOL_ID}",
-    f"https://cognito-idp.ap-south-1.amazonaws.com/{IDENTITY_POOL_ID}"
+    f"https://cognito-idp.{AWS_REGION}.amazonaws.com/{USER_POOL_ID}",
+    f"https://cognito-idp.{AWS_REGION}.amazonaws.com/{IDENTITY_POOL_ID}"
 }
 
 
