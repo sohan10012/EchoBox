@@ -1,4 +1,4 @@
-# EchoBox — Premium Anonymous Conversation Platform
+# EchoBox — Premium Anonymous Conversation Platform -
 
 > Create your space. Share your link. Converse in real-time with continuous anonymous messaging. No awkwardness. Just real thoughts.
 
